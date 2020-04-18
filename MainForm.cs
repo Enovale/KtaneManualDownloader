@@ -4,13 +4,10 @@ using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -204,6 +201,7 @@ namespace KtaneManualDownloader
                     {
                         mergedDocument.AddPage(page);
                     }
+                    coverPage.Dispose();
                 }
                 if (File.Exists(Main.Instance.IntroPath))
                 {
@@ -214,10 +212,9 @@ namespace KtaneManualDownloader
                     {
                         mergedDocument.AddPage(page);
                     }
+                    introPage.Dispose();
                 }
             }
-
-            List<PdfPage> modulePages = new List<PdfPage>();
 
             if(moduleGroupCheck.Checked)
             {
@@ -228,8 +225,9 @@ namespace KtaneManualDownloader
                         PdfDocumentOpenMode.Import);
                     foreach (PdfPage page in moduleSpacerPage.Pages)
                     {
-                        modulePages.Add(page);
+                        mergedDocument.AddPage(page);
                     }
+                    moduleSpacerPage.Dispose();
                 }
             }
 
@@ -249,8 +247,9 @@ namespace KtaneManualDownloader
                                     PdfDocumentOpenMode.Import);
                                 foreach (PdfPage page in needySpacerPage.Pages)
                                 {
-                                    modulePages.Add(page);
+                                    mergedDocument.AddPage(page);
                                 }
+                                needySpacerPage.Dispose();
                             }
                             addedNeedySpacer = true;
                         }
@@ -275,17 +274,13 @@ namespace KtaneManualDownloader
                         cancelWork = false;
                         return;
                     }
-                    modulePages.Add(page);
+                    mergedDocument.AddPage(page);
                 }
+                moduleManual.Dispose();
                 int i = modules.IndexOf(module);
                 MethodInvoker progressUpdate = new MethodInvoker(() =>
                     SetProgressBar((int)((float)i / modules.Count * 100)));
                 progressBar.Invoke(progressUpdate);
-            }
-
-            foreach (PdfPage page in modulePages)
-            {
-                mergedDocument.AddPage(page);
             }
 
             if(vanillaMergeCheck.Checked)
@@ -299,6 +294,7 @@ namespace KtaneManualDownloader
                     {
                         mergedDocument.AddPage(page);
                     }
+                    appendixPages.Dispose();
                 }
             }
 
@@ -313,7 +309,7 @@ namespace KtaneManualDownloader
             }
 
             mergedDocument.Dispose();
-            modulePages = null;
+            modules = null;
 
             MethodInvoker reenableControls = new MethodInvoker(() =>
                 ToggleControlsDuringDownload(true));
