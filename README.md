@@ -21,9 +21,7 @@ Make sure to press enter at the end to submit your input.
 After you've done that, configure your settings and press Download, and wait for a little bit.
 
 # Notes
-Please note that this program can use about 1 GB of RAM when you have 100+ mods installed.
-
-Also note that this in in-dev software made by an inexperienced dev, so bugs and oddities are to be expected.
+Please note that this in in-dev software made by an inexperienced dev, so bugs and oddities are to be expected.
 
 # Settings
 Here I will explain what each of the different options do.
@@ -34,8 +32,8 @@ If this option is checked, after downloading all of the manuals, they will be al
 ## Reverse Order:
 Checking this option will simply reverse the final output of whatever other rules have been selected.
 
-## Append(ixes):
-This feature is supposed to append any manual appendixes to the end of the document instead of after their respective module page, however this is NOT functioning yet as I can't find an efficient way to determine which pages are appendix pages.
+## Vanilla Merge:
+This option will put the vanilla KTaNE manual pages into your final merged manual (excluding vanilla modules). So for example, the cover page will be added to the beginning of your PDF, then the few intro pages, and the vanilla appendixes at the end of the document.
 
 ## Sorting:
 These options determine what order the merged PDF pages will be in.
