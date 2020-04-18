@@ -15,6 +15,7 @@ namespace KtaneManualDownloader
 
         public static Main Instance;
 
+        #region Path Vars
         public string ModsFolderLocation;
         public string ManualDownloadsFolder = Path.GetFullPath("./Manuals/");
         public string ManualJSONPath
@@ -25,6 +26,44 @@ namespace KtaneManualDownloader
             }
         }
         public string MergedManualOutputPath = "./MergedDocument.pdf";
+
+        public string VanillaDocsPath = Path.GetFullPath("./VanillaDocuments/");
+        public string CoverPath
+        {
+            get
+            {
+                return VanillaDocsPath + "Cover.pdf";
+            }
+        }
+        public string IntroPath
+        {
+            get
+            {
+                return VanillaDocsPath + "Intro.pdf";
+            }
+        }
+        public string ModuleSpacerPath
+        {
+            get
+            {
+                return VanillaDocsPath + "ModuleSpacer.pdf";
+            }
+        }
+        public string NeedySpacerPath
+        {
+            get
+            {
+                return VanillaDocsPath + "NeedySpacer.pdf";
+            }
+        }
+        public string AppendixPath
+        {
+            get
+            {
+                return VanillaDocsPath + "VanillaAppendix.pdf";
+            }
+        }
+        #endregion
 
         public List<string> CurrentModList = new List<string>();
 
@@ -42,31 +81,31 @@ namespace KtaneManualDownloader
                 modFolder = MakeValidPath(modFolder);
                 if (!IsValidPath(modFolder)) return false;
                 modDir = new DirectoryInfo(modFolder);
-            }
-            catch(Exception e)
-            {
-                MessageBox.Show("This folder path is broken somehow. " +
-                    "Please fix or report to the developer.");
-            }
-            if (modDir.Parent == null) return false;
-            // If using local mods, this check should succeed (<KTANEDIR>/mods)
-            if (modDir.Parent.GetFiles("ktane.exe").Length > 0) return true;
-            // If using steam mods, this check should succeed (<workshop/content/ktane>)
-            if (modDir.Parent.Parent != null)
-            {
-                if (modDir.Parent.Parent.Parent != null)
+                if (modDir.Parent == null) return false;
+                // If using local mods, this check should succeed (<KTANEDIR>/mods)
+                if (modDir.Parent.GetFiles("ktane.exe").Length > 0) return true;
+                // If using steam mods, this check should succeed (<workshop/content/ktane>)
+                if (modDir.Parent.Parent != null)
                 {
-                    DirectoryInfo steamApps = modDir.Parent.Parent.Parent;
-                    DirectoryInfo commonDir = steamApps.GetDirectories("common").FirstOrDefault();
-                    if (commonDir != null)
+                    if (modDir.Parent.Parent.Parent != null)
                     {
-                        DirectoryInfo gameDir = commonDir.GetDirectories("Keep Talking and Nobody Explodes")[0];
-                        if (gameDir != null)
+                        DirectoryInfo steamApps = modDir.Parent.Parent.Parent;
+                        DirectoryInfo commonDir = steamApps.GetDirectories("common").FirstOrDefault();
+                        if (commonDir != null)
                         {
-                            if (gameDir.GetFiles("ktane.exe").Length > 0) return true;
+                            DirectoryInfo gameDir = commonDir.GetDirectories("Keep Talking and Nobody Explodes")[0];
+                            if (gameDir != null)
+                            {
+                                if (gameDir.GetFiles("ktane.exe").Length > 0) return true;
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("This folder path is broken somehow. " +
+                    "Please fix or report to the developer.");
             }
             return false;
         }

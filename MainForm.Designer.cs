@@ -43,14 +43,14 @@
             this.label3 = new System.Windows.Forms.Label();
             this.selectModsDirBtn = new System.Windows.Forms.Button();
             this.modListPanel = new System.Windows.Forms.Panel();
-            this.appendAppendixesCheck = new System.Windows.Forms.CheckBox();
-            this.appendixTooltip = new System.Windows.Forms.ToolTip(this.components);
+            this.vanillaMergeCheck = new System.Windows.Forms.CheckBox();
             this.mergedPDFPathBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
             this.mergedPDFPathBtn = new System.Windows.Forms.Button();
             this.manualDownloadsBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.manualDownloadsBtn = new System.Windows.Forms.Button();
+            this.vanillaMergeTooltip = new System.Windows.Forms.ToolTip(this.components);
             this.SuspendLayout();
             // 
             // downloadBtn
@@ -201,19 +201,18 @@
             this.modListPanel.Size = new System.Drawing.Size(782, 292);
             this.modListPanel.TabIndex = 14;
             // 
-            // appendAppendixesCheck
+            // vanillaMergeCheck
             // 
-            this.appendAppendixesCheck.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.appendAppendixesCheck.AutoSize = true;
-            this.appendAppendixesCheck.Location = new System.Drawing.Point(414, 357);
-            this.appendAppendixesCheck.Name = "appendAppendixesCheck";
-            this.appendAppendixesCheck.Size = new System.Drawing.Size(87, 17);
-            this.appendAppendixesCheck.TabIndex = 15;
-            this.appendAppendixesCheck.Text = "Append(ixes)";
-            this.appendixTooltip.SetToolTip(this.appendAppendixesCheck, "If this is checked, appendix pages will be added to the\r\nend of the entire docume" +
-        "nt instead of after the module.\r\n(NOTE: This currently isn\'t implemented at all)" +
-        "");
-            this.appendAppendixesCheck.UseVisualStyleBackColor = true;
+            this.vanillaMergeCheck.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.vanillaMergeCheck.AutoSize = true;
+            this.vanillaMergeCheck.Location = new System.Drawing.Point(414, 357);
+            this.vanillaMergeCheck.Name = "vanillaMergeCheck";
+            this.vanillaMergeCheck.Size = new System.Drawing.Size(90, 17);
+            this.vanillaMergeCheck.TabIndex = 15;
+            this.vanillaMergeCheck.Text = "Merge Vanilla";
+            this.vanillaMergeTooltip.SetToolTip(this.vanillaMergeCheck, "If this is checked, the manual cover,\r\nintro pages, and vanilla appendixes\r\nwill " +
+        "be merged into the final manual.");
+            this.vanillaMergeCheck.UseVisualStyleBackColor = true;
             // 
             // mergedPDFPathBox
             // 
@@ -284,7 +283,7 @@
             this.Controls.Add(this.mergedPDFPathBtn);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.mergedPDFPathBox);
-            this.Controls.Add(this.appendAppendixesCheck);
+            this.Controls.Add(this.vanillaMergeCheck);
             this.Controls.Add(this.modListPanel);
             this.Controls.Add(this.selectModsDirBtn);
             this.Controls.Add(this.label3);
@@ -326,14 +325,14 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button selectModsDirBtn;
         private System.Windows.Forms.Panel modListPanel;
-        private System.Windows.Forms.CheckBox appendAppendixesCheck;
-        private System.Windows.Forms.ToolTip appendixTooltip;
+        private System.Windows.Forms.CheckBox vanillaMergeCheck;
         private System.Windows.Forms.TextBox mergedPDFPathBox;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Button mergedPDFPathBtn;
         private System.Windows.Forms.TextBox manualDownloadsBox;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button manualDownloadsBtn;
+        private System.Windows.Forms.ToolTip vanillaMergeTooltip;
     }
 }
 

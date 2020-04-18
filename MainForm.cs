@@ -193,10 +193,70 @@ namespace KtaneManualDownloader
 
             PdfDocument mergedDocument = new PdfDocument();
 
+            if (vanillaMergeCheck.Checked)
+            {
+                if (File.Exists(Main.Instance.CoverPath))
+                {
+                    PdfDocument coverPage = PdfReader.Open(
+                        Main.Instance.CoverPath,
+                        PdfDocumentOpenMode.Import);
+                    foreach (PdfPage page in coverPage.Pages)
+                    {
+                        mergedDocument.AddPage(page);
+                    }
+                }
+                if (File.Exists(Main.Instance.IntroPath))
+                {
+                    PdfDocument introPage = PdfReader.Open(
+                        Main.Instance.IntroPath,
+                        PdfDocumentOpenMode.Import);
+                    foreach (PdfPage page in introPage.Pages)
+                    {
+                        mergedDocument.AddPage(page);
+                    }
+                }
+            }
+
             List<PdfPage> modulePages = new List<PdfPage>();
-            List<PdfPage> appendixPages = new List<PdfPage>();
+
+            if(moduleGroupCheck.Checked)
+            {
+                if (File.Exists(Main.Instance.ModuleSpacerPath))
+                {
+                    PdfDocument moduleSpacerPage = PdfReader.Open(
+                        Main.Instance.ModuleSpacerPath,
+                        PdfDocumentOpenMode.Import);
+                    foreach (PdfPage page in moduleSpacerPage.Pages)
+                    {
+                        modulePages.Add(page);
+                    }
+                }
+            }
+
+            bool addedNeedySpacer = false;
             foreach (KtaneModule module in modules)
             {
+                if (moduleGroupCheck.Checked)
+                {
+                    if(module.Type == Scraper.ModuleType.Needy) 
+                    {
+                        if (!addedNeedySpacer)
+                        {
+                            if (File.Exists(Main.Instance.NeedySpacerPath))
+                            {
+                                PdfDocument needySpacerPage = PdfReader.Open(
+                                    Main.Instance.NeedySpacerPath,
+                                    PdfDocumentOpenMode.Import);
+                                foreach (PdfPage page in needySpacerPage.Pages)
+                                {
+                                    modulePages.Add(page);
+                                }
+                            }
+                            addedNeedySpacer = true;
+                        }
+                    }
+                }
+
                 PdfDocument moduleManual = PdfReader.Open(
                     Main.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf",
                     PdfDocumentOpenMode.Import);
@@ -215,15 +275,7 @@ namespace KtaneManualDownloader
                         cancelWork = false;
                         return;
                     }
-                    bool appendix = false;
-                    if (!appendix)
-                    {
-                        modulePages.Add(page);
-                    }
-                    else
-                    {
-                        appendixPages.Add(page);
-                    }
+                    modulePages.Add(page);
                 }
                 int i = modules.IndexOf(module);
                 MethodInvoker progressUpdate = new MethodInvoker(() =>
@@ -235,9 +287,19 @@ namespace KtaneManualDownloader
             {
                 mergedDocument.AddPage(page);
             }
-            foreach (PdfPage page in appendixPages)
+
+            if(vanillaMergeCheck.Checked)
             {
-                mergedDocument.AddPage(page);
+                if (File.Exists(Main.Instance.AppendixPath))
+                {
+                    PdfDocument appendixPages = PdfReader.Open(
+                        Main.Instance.AppendixPath,
+                        PdfDocumentOpenMode.Import);
+                    foreach (PdfPage page in appendixPages.Pages)
+                    {
+                        mergedDocument.AddPage(page);
+                    }
+                }
             }
 
             string errorMessage = "";
@@ -252,7 +314,6 @@ namespace KtaneManualDownloader
 
             mergedDocument.Dispose();
             modulePages = null;
-            appendixPages = null;
 
             MethodInvoker reenableControls = new MethodInvoker(() =>
                 ToggleControlsDuringDownload(true));
@@ -314,7 +375,7 @@ namespace KtaneManualDownloader
             selectModsDirBtn.Enabled = state;
             mergeCheck.Enabled = state;
             reverseOrderCheck.Enabled = state;
-            appendAppendixesCheck.Enabled = state;
+            vanillaMergeCheck.Enabled = state;
             modMergeRadio.Enabled = state;
             moduleMergeRadio.Enabled = state;
             diffMergeRadio.Enabled = state;
@@ -330,7 +391,7 @@ namespace KtaneManualDownloader
         private void ToggleMergeControls(bool state)
         {
             reverseOrderCheck.Enabled = state;
-            appendAppendixesCheck.Enabled = state;
+            vanillaMergeCheck.Enabled = state;
             modMergeRadio.Enabled = state;
             moduleMergeRadio.Enabled = state;
             diffMergeRadio.Enabled = state;
