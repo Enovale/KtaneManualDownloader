@@ -3,6 +3,10 @@ This program allows you to download updated manuals for your installed KTANE mod
 
 The manuals are grabbed from the [Repository of Manual Pages](https://ktane.timwi.de/).
 
+# Prerequisites:
+If the app won't launch, make sure you've installed the [.NET Framework 4.7.2 Runtime or higher.](https://dotnet.microsoft.com/download/dotnet-framework/net472)
+Make sure not to install the developer pack unless you actually want it.
+
 # Usage
 To use it, simply open it up, and type/browser your game's mod folder.
 
