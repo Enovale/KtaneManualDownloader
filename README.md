@@ -59,3 +59,5 @@ The **Group by module type** option allows you to group all of the modules in or
 4. Make better code so bugs don't happen
 5. Stop being bad
 6. Write a tutorial for building (it should work out of box, right?)
+7. Find a way to properly package this app without using the stupid OneClick wizard
+8. Stop adding to the readme
