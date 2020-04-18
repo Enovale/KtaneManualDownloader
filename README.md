@@ -35,7 +35,7 @@ If this option is checked, after downloading all of the manuals, they will be al
 Checking this option will simply reverse the final output of whatever other rules have been selected.
 
 ## Append(ixes):
-This feature is supposed to append any manual appendixes to the end of the document instead of after their respective module page, however this is NOT functioning yet as I can't find an efficient way to determine which pages are appendixe pages.
+This feature is supposed to append any manual appendixes to the end of the document instead of after their respective module page, however this is NOT functioning yet as I can't find an efficient way to determine which pages are appendix pages.
 
 ## Sorting:
 These options determine what order the merged PDF pages will be in.
