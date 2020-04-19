@@ -222,7 +222,7 @@ namespace KtaneManualDownloader
             }
             if (reverseOrderCheck.Checked) modules.Reverse();
 
-            // Remove deleted mods
+            // Remove unchecked mods
             foreach(CheckBox modCheck in modListPanel.Controls)
             {
                 if(!modCheck.Checked)
@@ -259,26 +259,32 @@ namespace KtaneManualDownloader
                 }
             }
 
-            if(moduleGroupCheck.Checked)
-            {
-                if (File.Exists(Main.Instance.ModuleSpacerPath))
-                {
-                    PdfDocument moduleSpacerPage = PdfReader.Open(
-                        Main.Instance.ModuleSpacerPath,
-                        PdfDocumentOpenMode.Import);
-                    foreach (PdfPage page in moduleSpacerPage.Pages)
-                    {
-                        mergedDocument.AddPage(page);
-                    }
-                    moduleSpacerPage.Dispose();
-                }
-            }
 
+            bool addedModuleSpacer = false;
             bool addedNeedySpacer = false;
             foreach (KtaneModule module in modules)
             {
                 if (moduleGroupCheck.Checked)
                 {
+                    if(module.Type == Scraper.ModuleType.Regular)
+                    {
+                        if (!addedModuleSpacer)
+                        {
+                            if (File.Exists(Main.Instance.ModuleSpacerPath))
+                            {
+                                PdfDocument moduleSpacerPage = PdfReader.Open(
+                                    Main.Instance.ModuleSpacerPath,
+                                    PdfDocumentOpenMode.Import);
+                                foreach (PdfPage page in moduleSpacerPage.Pages)
+                                {
+                                    mergedDocument.AddPage(page);
+                                }
+                                moduleSpacerPage.Dispose();
+                            }
+                            addedModuleSpacer = true;
+                        }
+                    }
+
                     if(module.Type == Scraper.ModuleType.Needy) 
                     {
                         if (!addedNeedySpacer)
@@ -344,6 +350,9 @@ namespace KtaneManualDownloader
             string errorMessage = "";
             if (mergedDocument.CanSave(ref errorMessage))
             {
+                MethodInvoker progressUpdate = new MethodInvoker(() =>
+                    SetProgressBar(100));
+                progressBar.Invoke(progressUpdate);
                 mergedDocument.Save(Main.Instance.MergedManualOutputPath);
             }
             else
