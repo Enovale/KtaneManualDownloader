@@ -65,9 +65,6 @@ namespace KtaneManualDownloader
         public void Search(string term)
         {
             string script = "" + 
-                @"if(!$('#search-workshopids').is(':checked')) {
-                    $('#search-workshopids').click();
-                }" +
                 $"$('#search-field').val('{term}');" +
                 $"$('#search-field').trigger('keyup');";
 
@@ -97,6 +94,7 @@ namespace KtaneManualDownloader
             @"var modNames = [];
             var modPDFs = [];
             var modTypes = [];
+            var modDiffs = [];
 
             function extractInfo(mod, i) {
 
@@ -120,6 +118,20 @@ namespace KtaneManualDownloader
                     modType = mod.childNodes[3].childNodes[1].childNodes[0].innerHTML;
                 }
                 modTypes.push(modType);
+
+                var modDiff = '';
+                var diffDiv;
+                if(mod.childNodes[3].class != 'infos - 1') {
+                    diffDiv = mod.childNodes[5].childNodes[0].childNodes[2];
+                } else {
+                    diffDiv = mod.childNodes[4].childNodes[0].childNodes[2];
+                }
+                if(diffDiv.childNodes.length > 1) {
+                    modDiff = diffDiv.childNodes[2].innerHTML;
+                } else {
+                    modDiff = diffDiv.childNodes[0].innerHTML;
+                }
+                modDiffs.push(modDiff);
             }
 
             searchResults.forEach(extractInfo);
@@ -132,10 +144,12 @@ namespace KtaneManualDownloader
             List<object> modNamesObj = (List<object>)frame.EvaluateScriptAsync("modNames;").Result.Result;
             List<object> modPDFsObj = (List<object>)frame.EvaluateScriptAsync("modPDFs;").Result.Result;
             List<object> modTypesObj = (List<object>)frame.EvaluateScriptAsync("modTypes;").Result.Result;
+            List<object> modDiffsObj = (List<object>)frame.EvaluateScriptAsync("modDiffs;").Result.Result;
 
             List<string> modNames = modNamesObj.Cast<string>().ToList();
             List<string> modPDFs = modPDFsObj.Cast<string>().ToList();
             List<string> modTypes = modTypesObj.Cast<string>().ToList();
+            List<string> modDiffs = modDiffsObj.Cast<string>().ToList();
 
             List<KtaneModule> finalList = new List<KtaneModule>();
 
@@ -143,7 +157,7 @@ namespace KtaneManualDownloader
             {
                 int i = modNames.IndexOf(name);
 
-                finalList.Add(new KtaneModule(name, modPDFs[i], TypeStringToEnum(modTypes[i]), ModuleDifficulty.Easy));
+                finalList.Add(new KtaneModule(name, modPDFs[i], TypeStringToEnum(modTypes[i]), DiffStringToEnum(modDiffs[i])));
             }
 
             return finalList;
@@ -178,6 +192,25 @@ namespace KtaneManualDownloader
                     return ModuleType.Boss;
                 default:
                     return ModuleType.Uncategorized;
+            }
+        }
+
+        public ModuleDifficulty DiffStringToEnum(string difficulty)
+        {
+            switch(difficulty.ToLower().Trim())
+            {
+                case "very easy":
+                    return ModuleDifficulty.VeryEasy;
+                case "easy":
+                    return ModuleDifficulty.Easy;
+                case "medium":
+                    return ModuleDifficulty.Medium;
+                case "hard":
+                    return ModuleDifficulty.Hard;
+                case "very hard":
+                    return ModuleDifficulty.VeryHard;
+                default:
+                    return ModuleDifficulty.Medium;
             }
         }
 

@@ -45,8 +45,10 @@ namespace KtaneManualDownloader
             foreach(string mod in modList)
             {
                 int i = Array.IndexOf(modList, mod);
-                CheckBox modEntry = new CheckBox();
-                modEntry.Text = mod;
+                CheckBox modEntry = new CheckBox
+                {
+                    Text = mod
+                };
                 modEntry.Location = new Point(5, i * modEntry.Height);
                 modEntry.Size = new Size(modListPanel.Width - 25, modEntry.Height);
                 modEntry.Checked = true;
@@ -72,6 +74,7 @@ namespace KtaneManualDownloader
             modList.Sort((x, y) => string.Compare(x.Item1, y.Item1));
 
             List<string> modNameList = new List<string>();
+            Main.Instance.CurrentModList = new List<string>();
             foreach ((string, string) mod in modList)
             {
                 modNameList.Add(mod.Item1);
@@ -100,9 +103,22 @@ namespace KtaneManualDownloader
             }
         }
 
+        private void mergeBtn_Click(object sender, EventArgs e)
+        {
+            if (downloading)
+            {
+                cancelWork = true;
+            }
+            else
+            {
+                ToggleControlsDuringDownload(false);
+                Task.Run(MergeManuals);
+            }
+        }
+
         private void DownloadManuals()
         {
-            if (modListPanel.Controls.Count <= 0)
+            if (modListPanel.Controls.Count <= 0 || !AreNoModsSelected())
             {
                 MethodInvoker enableControlsFailure = new MethodInvoker(() =>
                     ToggleControlsDuringDownload(true));
@@ -130,8 +146,12 @@ namespace KtaneManualDownloader
                 {
                     module.ModName = modListPanel.Controls[i].Text;
                     moduleList.Add(module);
-                    if(File.Exists((Main.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf"))) {
-                        continue;
+                    if(!redownloadCheck.Checked)
+                    {
+                        if (File.Exists((Main.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf")))
+                        {
+                            continue;
+                        }
                     }
                     PdfDocument manual = Scraper.Instance.DownloadManual(module.ManualURL);
                     manual.Save(Main.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf");
@@ -156,12 +176,26 @@ namespace KtaneManualDownloader
         {
             SortMode sortMode = DetermineSortMode();
 
+            if (modListPanel.Controls.Count <= 0 || !AreNoModsSelected())
+            {
+                MethodInvoker enableControlsFailure = new MethodInvoker(() =>
+                    ToggleControlsDuringDownload(true));
+                Invoke(enableControlsFailure);
+                return;
+            }
+
             DirectoryInfo manualDir = new DirectoryInfo(Main.Instance.ManualDownloadsFolder);
             // If dir is empty or just modules.json
             if (manualDir.GetFiles().Length <= 1)
             {
                 MessageBox.Show("No manuals have been downloaded, " +
                     "please redownload them or report this to the developer");
+                return;
+            }
+            if(!File.Exists(Main.Instance.ManualJSONPath))
+            {
+                MessageBox.Show("You cannot merge manuals because you have not completed a download" +
+                    "of the manuals yet. Starting it and cancelling it isn't enough");
                 return;
             }
 
@@ -187,6 +221,15 @@ namespace KtaneManualDownloader
                 modules = sortedList;
             }
             if (reverseOrderCheck.Checked) modules.Reverse();
+
+            // Remove deleted mods
+            foreach(CheckBox modCheck in modListPanel.Controls)
+            {
+                if(!modCheck.Checked)
+                {
+                    modules.RemoveAll(mod => mod.ModName == modCheck.Text);
+                }
+            }
 
             PdfDocument mergedDocument = new PdfDocument();
 
@@ -331,7 +374,16 @@ namespace KtaneManualDownloader
                     modules = modules.OrderBy(mod => mod.ModuleName).ToList();
                     break;
                 case SortMode.Difficulty:
-                    modules = modules.OrderBy(mod => mod.Difficulty).ToList();
+                    List<List<KtaneModule>> groupedList = modules.GroupBy(mod => mod.Difficulty)
+                        .Select(grp => grp.ToList())
+                        .OrderBy(list => list.First().Difficulty)
+                        .ToList();
+                    List<KtaneModule> sortedList = new List<KtaneModule>();
+                    foreach (List<KtaneModule> list in groupedList)
+                    {
+                        sortedList.AddRange(list.OrderBy(mod => mod.ModuleName).ToList());
+                    }
+                    modules = sortedList;
                     break;
             }
 
@@ -367,6 +419,8 @@ namespace KtaneManualDownloader
             }
 
             //downloadBtn.Enabled = state;
+            mergeBtn.Enabled = state;
+            redownloadCheck.Enabled = state;
             modsFolderBox.Enabled = state;
             selectModsDirBtn.Enabled = state;
             mergeCheck.Enabled = state;
@@ -439,12 +493,14 @@ namespace KtaneManualDownloader
 
         private void mergedPDFPathBtn_Click(object sender, EventArgs e)
         {
-            OpenFileDialog folderBrowser = new OpenFileDialog();
-            folderBrowser.CheckFileExists = false;
-            folderBrowser.CheckPathExists = true;
-            folderBrowser.Title = "Selected where to output the merged PDF";
-            folderBrowser.InitialDirectory = Path.GetDirectoryName(Application.ExecutablePath);
-            folderBrowser.FileName = Path.GetFileName(Main.Instance.MergedManualOutputPath);
+            OpenFileDialog folderBrowser = new OpenFileDialog
+            {
+                CheckFileExists = false,
+                CheckPathExists = true,
+                Title = "Selected where to output the merged PDF",
+                InitialDirectory = Path.GetDirectoryName(Application.ExecutablePath),
+                FileName = Path.GetFileName(Main.Instance.MergedManualOutputPath)
+            };
             if (folderBrowser.ShowDialog() == DialogResult.OK)
             {
                 mergedPDFPathBox.Text = folderBrowser.FileName;
@@ -474,6 +530,36 @@ namespace KtaneManualDownloader
             {
                 Main.Instance.ModsFolderLocation = modsFolderBox.Text;
                 LoadMods();
+            }
+        }
+
+        private bool AreNoModsSelected()
+        {
+            bool isOneChecked = false;
+            foreach(CheckBox box in modListPanel.Controls)
+            {
+                if(box.Checked)
+                {
+                    isOneChecked = true;
+                    break;
+                }
+            }
+            return isOneChecked;
+        }
+
+        private void deselectBtn_Click(object sender, EventArgs e)
+        {
+            foreach(CheckBox box in modListPanel.Controls)
+            {
+                box.Checked = false;
+            }
+        }
+
+        private void selectBtn_Click(object sender, EventArgs e)
+        {
+            foreach (CheckBox box in modListPanel.Controls)
+            {
+                box.Checked = true;
             }
         }
     }

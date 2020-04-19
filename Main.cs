@@ -72,12 +72,11 @@ namespace KtaneManualDownloader
 
         public bool IsFolderKtane(string modFolder)
         {
-            DirectoryInfo modDir = null;
             try
             {
                 modFolder = MakeValidPath(modFolder);
                 if (!IsValidPath(modFolder)) return false;
-                modDir = new DirectoryInfo(modFolder);
+                DirectoryInfo modDir = new DirectoryInfo(modFolder);
                 if (modDir.Parent == null) return false;
                 // If using local mods, this check should succeed (<KTANEDIR>/mods)
                 if (modDir.Parent.GetFiles("ktane.exe").Length > 0) return true;
@@ -102,7 +101,7 @@ namespace KtaneManualDownloader
             catch (Exception e)
             {
                 MessageBox.Show("This folder path is broken somehow. " +
-                    "Please fix or report to the developer.");
+                    "Please fix or report to the developer.\n" + e.Message);
             }
             return false;
         }

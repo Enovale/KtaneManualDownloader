@@ -51,6 +51,10 @@
             this.label5 = new System.Windows.Forms.Label();
             this.manualDownloadsBtn = new System.Windows.Forms.Button();
             this.vanillaMergeTooltip = new System.Windows.Forms.ToolTip(this.components);
+            this.redownloadCheck = new System.Windows.Forms.CheckBox();
+            this.mergeBtn = new System.Windows.Forms.Button();
+            this.deselectBtn = new System.Windows.Forms.Button();
+            this.selectBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // downloadBtn
@@ -67,8 +71,7 @@
             // 
             // mergeCheck
             // 
-            this.mergeCheck.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.mergeCheck.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.mergeCheck.AutoSize = true;
             this.mergeCheck.Checked = true;
             this.mergeCheck.CheckState = System.Windows.Forms.CheckState.Checked;
@@ -144,6 +147,7 @@
             // 
             // reverseOrderCheck
             // 
+            this.reverseOrderCheck.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.reverseOrderCheck.AutoSize = true;
             this.reverseOrderCheck.Location = new System.Drawing.Point(414, 374);
             this.reverseOrderCheck.Name = "reverseOrderCheck";
@@ -272,11 +276,59 @@
             this.manualDownloadsBtn.UseVisualStyleBackColor = true;
             this.manualDownloadsBtn.Click += new System.EventHandler(this.manualDownloadsBtn_Click);
             // 
+            // redownloadCheck
+            // 
+            this.redownloadCheck.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.redownloadCheck.AutoSize = true;
+            this.redownloadCheck.Location = new System.Drawing.Point(414, 339);
+            this.redownloadCheck.Name = "redownloadCheck";
+            this.redownloadCheck.Size = new System.Drawing.Size(116, 17);
+            this.redownloadCheck.TabIndex = 22;
+            this.redownloadCheck.Text = "Force Redownload";
+            this.vanillaMergeTooltip.SetToolTip(this.redownloadCheck, "Test");
+            this.redownloadCheck.UseVisualStyleBackColor = true;
+            // 
+            // mergeBtn
+            // 
+            this.mergeBtn.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.mergeBtn.Location = new System.Drawing.Point(333, 364);
+            this.mergeBtn.Name = "mergeBtn";
+            this.mergeBtn.Size = new System.Drawing.Size(75, 23);
+            this.mergeBtn.TabIndex = 23;
+            this.mergeBtn.Text = "Merge Only";
+            this.mergeBtn.UseVisualStyleBackColor = true;
+            this.mergeBtn.Click += new System.EventHandler(this.mergeBtn_Click);
+            // 
+            // deselectBtn
+            // 
+            this.deselectBtn.Location = new System.Drawing.Point(12, 310);
+            this.deselectBtn.Name = "deselectBtn";
+            this.deselectBtn.Size = new System.Drawing.Size(75, 23);
+            this.deselectBtn.TabIndex = 24;
+            this.deselectBtn.Text = "Deselect All";
+            this.deselectBtn.UseVisualStyleBackColor = true;
+            this.deselectBtn.Click += new System.EventHandler(this.deselectBtn_Click);
+            // 
+            // selectBtn
+            // 
+            this.selectBtn.Location = new System.Drawing.Point(94, 310);
+            this.selectBtn.Name = "selectBtn";
+            this.selectBtn.Size = new System.Drawing.Size(75, 23);
+            this.selectBtn.TabIndex = 25;
+            this.selectBtn.Text = "Select All";
+            this.selectBtn.UseVisualStyleBackColor = true;
+            this.selectBtn.Click += new System.EventHandler(this.selectBtn_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.selectBtn);
+            this.Controls.Add(this.deselectBtn);
+            this.Controls.Add(this.mergeBtn);
+            this.Controls.Add(this.redownloadCheck);
             this.Controls.Add(this.manualDownloadsBtn);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.manualDownloadsBox);
@@ -333,6 +385,10 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button manualDownloadsBtn;
         private System.Windows.Forms.ToolTip vanillaMergeTooltip;
+        private System.Windows.Forms.CheckBox redownloadCheck;
+        private System.Windows.Forms.Button mergeBtn;
+        private System.Windows.Forms.Button deselectBtn;
+        private System.Windows.Forms.Button selectBtn;
     }
 }
 
