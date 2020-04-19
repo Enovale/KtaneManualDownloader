@@ -45,17 +45,16 @@ This sort mode will sort all of the modules alphabetically by the mod they're a 
 This sort mode will sort every module alphabetically by the name of the module itself.
 
 ### Sort by difficulty
-This sort mode will sort every module by it's difficulty, starting from Very Easy (this is probably actually alphabetical, and also not working lmao)
+This sort mode will group all the modules by their difficulty, starting from Very Easy.
+Within these groups they will be sorted alphabetically by their module name.
 
 ## Grouping:
 The **Group by module type** option allows you to group all of the modules in order of their type, so Regular modules will come first, then Needy modules. Within these groups, they will be sorted by the aforementioned [sorting rules](#sorting:).
 
 # TODO:
-1. Make append(ixes) work
-2. Get experting difficulty on the KtaneModule object for sorting.
-3. More bug catching
-4. Make better code so bugs don't happen
-5. Stop being bad
-6. Write a tutorial for building (it should work out of box, right?)
-7. Find a way to properly package this app without using the stupid OneClick wizard
-8. Stop adding to the readme
+1. ~~Make append(ixes) work~~ This has been scrapped but maybe ill fix it someday
+2. More bug catching
+3. Make better code so bugs don't happen
+4. Stop being bad
+5. Write a tutorial for building (it should work out of box, right?)
+6. Find a way to properly package this app without using the stupid OneClick wizard
