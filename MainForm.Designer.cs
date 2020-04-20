@@ -50,11 +50,12 @@
             this.manualDownloadsBox = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.manualDownloadsBtn = new System.Windows.Forms.Button();
-            this.vanillaMergeTooltip = new System.Windows.Forms.ToolTip(this.components);
+            this.infoTooltip = new System.Windows.Forms.ToolTip(this.components);
             this.redownloadCheck = new System.Windows.Forms.CheckBox();
             this.mergeBtn = new System.Windows.Forms.Button();
             this.deselectBtn = new System.Windows.Forms.Button();
             this.selectBtn = new System.Windows.Forms.Button();
+            this.resetSettingsBtn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // downloadBtn
@@ -80,6 +81,8 @@
             this.mergeCheck.Size = new System.Drawing.Size(85, 17);
             this.mergeCheck.TabIndex = 1;
             this.mergeCheck.Text = "Merge PDFs";
+            this.infoTooltip.SetToolTip(this.mergeCheck, "Merging PDFs will put the PDFs of all of your\r\nselected manuals into one big PDF " +
+        "accoring\r\nto the sorting and grouping rules here.");
             this.mergeCheck.UseVisualStyleBackColor = true;
             this.mergeCheck.CheckedChanged += new System.EventHandler(this.mergeCheck_CheckedChanged);
             // 
@@ -143,6 +146,8 @@
             this.moduleGroupCheck.Size = new System.Drawing.Size(129, 17);
             this.moduleGroupCheck.TabIndex = 7;
             this.moduleGroupCheck.Text = "Group by module type";
+            this.infoTooltip.SetToolTip(this.moduleGroupCheck, "This option will put the \"Section 1: Modules\" spacers\r\nbetween the different modu" +
+        "le types, and will group\r\nsaid modules depending on this type.");
             this.moduleGroupCheck.UseVisualStyleBackColor = true;
             // 
             // reverseOrderCheck
@@ -154,6 +159,8 @@
             this.reverseOrderCheck.Size = new System.Drawing.Size(93, 17);
             this.reverseOrderCheck.TabIndex = 8;
             this.reverseOrderCheck.Text = "Reverse order";
+            this.infoTooltip.SetToolTip(this.reverseOrderCheck, "Checking this will simply reverse the sorting\r\nof whatever other settings you cho" +
+        "ose.");
             this.reverseOrderCheck.UseVisualStyleBackColor = true;
             // 
             // progressBar
@@ -178,9 +185,9 @@
             this.label3.AutoSize = true;
             this.label3.Location = new System.Drawing.Point(12, 391);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(103, 13);
+            this.label3.Size = new System.Drawing.Size(102, 13);
             this.label3.TabIndex = 12;
-            this.label3.Text = "KTANE mods folder:";
+            this.label3.Text = "KTaNE mods folder:";
             // 
             // selectModsDirBtn
             // 
@@ -214,7 +221,7 @@
             this.vanillaMergeCheck.Size = new System.Drawing.Size(90, 17);
             this.vanillaMergeCheck.TabIndex = 15;
             this.vanillaMergeCheck.Text = "Merge Vanilla";
-            this.vanillaMergeTooltip.SetToolTip(this.vanillaMergeCheck, "If this is checked, the manual cover,\r\nintro pages, and vanilla appendixes\r\nwill " +
+            this.infoTooltip.SetToolTip(this.vanillaMergeCheck, "If this is checked, the manual cover,\r\nintro pages, and vanilla appendixes\r\nwill " +
         "be merged into the final manual.");
             this.vanillaMergeCheck.UseVisualStyleBackColor = true;
             // 
@@ -285,7 +292,8 @@
             this.redownloadCheck.Size = new System.Drawing.Size(116, 17);
             this.redownloadCheck.TabIndex = 22;
             this.redownloadCheck.Text = "Force Redownload";
-            this.vanillaMergeTooltip.SetToolTip(this.redownloadCheck, "Test");
+            this.infoTooltip.SetToolTip(this.redownloadCheck, "If this is checked, all mods will be redownloaded,\r\neven if they\'re found in the " +
+        "specified manuals folder.");
             this.redownloadCheck.UseVisualStyleBackColor = true;
             // 
             // mergeBtn
@@ -297,6 +305,7 @@
             this.mergeBtn.Size = new System.Drawing.Size(75, 23);
             this.mergeBtn.TabIndex = 23;
             this.mergeBtn.Text = "Merge Only";
+            this.infoTooltip.SetToolTip(this.mergeBtn, "Only merge your currently downloaded manuals.");
             this.mergeBtn.UseVisualStyleBackColor = true;
             this.mergeBtn.Click += new System.EventHandler(this.mergeBtn_Click);
             // 
@@ -320,11 +329,24 @@
             this.selectBtn.UseVisualStyleBackColor = true;
             this.selectBtn.Click += new System.EventHandler(this.selectBtn_Click);
             // 
+            // resetSettingsBtn
+            // 
+            this.resetSettingsBtn.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.resetSettingsBtn.Location = new System.Drawing.Point(706, 310);
+            this.resetSettingsBtn.Name = "resetSettingsBtn";
+            this.resetSettingsBtn.Size = new System.Drawing.Size(88, 23);
+            this.resetSettingsBtn.TabIndex = 26;
+            this.resetSettingsBtn.Text = "Reset Settings";
+            this.infoTooltip.SetToolTip(this.resetSettingsBtn, "Reset all saved settings (paths, sorts, etc)");
+            this.resetSettingsBtn.UseVisualStyleBackColor = true;
+            this.resetSettingsBtn.Click += new System.EventHandler(this.resetSettingsBtn_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.resetSettingsBtn);
             this.Controls.Add(this.selectBtn);
             this.Controls.Add(this.deselectBtn);
             this.Controls.Add(this.mergeBtn);
@@ -354,7 +376,7 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "KTANE Manual Downloader";
+            this.Text = "KTaNE Manual Downloader";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -384,11 +406,12 @@
         private System.Windows.Forms.TextBox manualDownloadsBox;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button manualDownloadsBtn;
-        private System.Windows.Forms.ToolTip vanillaMergeTooltip;
+        private System.Windows.Forms.ToolTip infoTooltip;
         private System.Windows.Forms.CheckBox redownloadCheck;
         private System.Windows.Forms.Button mergeBtn;
         private System.Windows.Forms.Button deselectBtn;
         private System.Windows.Forms.Button selectBtn;
+        private System.Windows.Forms.Button resetSettingsBtn;
     }
 }
 

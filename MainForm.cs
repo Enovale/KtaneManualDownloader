@@ -34,9 +34,54 @@ namespace KtaneManualDownloader
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            LoadSettings();
+
             mergedPDFPathBox.Text = Main.Instance.MergedManualOutputPath;
             manualDownloadsBox.Text = Main.Instance.ManualDownloadsFolder;
+            modsFolderBox.Text = Main.Instance.ModsFolderLocation;
             LoadMods();
+        }
+
+        public void LoadSettings()
+        {
+            if(!string.IsNullOrEmpty(Properties.Settings.Default.ModFolderPath))
+            {
+                Main.Instance.ModsFolderLocation = Properties.Settings.Default.ModFolderPath;
+            }
+
+            if (string.IsNullOrEmpty(Properties.Settings.Default.ManualFolderPath))
+            {
+                Properties.Settings.Default.ManualFolderPath = Main.Instance.ManualDownloadsFolder;
+            }
+            else
+            {
+                Main.Instance.ManualDownloadsFolder = Properties.Settings.Default.ManualFolderPath;
+            }
+
+            if (string.IsNullOrEmpty(Properties.Settings.Default.MergedPDFPath))
+            {
+                Properties.Settings.Default.MergedPDFPath = Main.Instance.MergedManualOutputPath;
+            }
+            else
+            {
+                Main.Instance.MergedManualOutputPath = Properties.Settings.Default.MergedPDFPath;
+            }
+
+            Properties.Settings.Default.Save();
+        }
+
+        public void ResetSettings()
+        {
+            modsFolderBox.Text = "";
+            manualDownloadsBox.Text = Path.GetFullPath("./Manuals/");
+            mergedPDFPathBox.Text = "./MergedDocument.pdf";
+
+            Properties.Settings.Default.ModFolderPath = modsFolderBox.Text;
+            Properties.Settings.Default.ManualFolderPath = manualDownloadsBox.Text;
+            Properties.Settings.Default.MergedPDFPath = mergedPDFPathBox.Text;
+            Properties.Settings.Default.Save();
+
+            modListPanel.Controls.Clear();
         }
 
         public void LoadModList(string[] modList)
@@ -58,10 +103,12 @@ namespace KtaneManualDownloader
 
         public void LoadMods(string modsFolder = null)
         {
-            if (modsFolder != null) Main.Instance.ModsFolderLocation = modsFolder;
             if ((Main.Instance.ModsFolderLocation ?? "").Trim() == "") return;
             if (!Main.Instance.IsFolderKtane(Main.Instance.ModsFolderLocation)) return;
             if (!Directory.Exists(Main.Instance.ModsFolderLocation)) return;
+
+            Properties.Settings.Default.ModFolderPath = Main.Instance.ModsFolderLocation;
+            Properties.Settings.Default.Save();
 
             List<(string, string)> modList = new List<(string, string)>();
             string[] dirs = Directory.GetDirectories(Main.Instance.ModsFolderLocation, "*", SearchOption.TopDirectoryOnly);
@@ -459,6 +506,20 @@ namespace KtaneManualDownloader
             mergedPDFPathBtn.Enabled = state;
         }
 
+        private bool AreNoModsSelected()
+        {
+            bool isOneChecked = false;
+            foreach (CheckBox box in modListPanel.Controls)
+            {
+                if (box.Checked)
+                {
+                    isOneChecked = true;
+                    break;
+                }
+            }
+            return isOneChecked;
+        }
+
         private void mergeCheck_CheckedChanged(object sender, EventArgs e)
         {
             if(mergeCheck.Checked)
@@ -496,6 +557,9 @@ namespace KtaneManualDownloader
                 {
                     manualDownloadsBox.Text = fbd.SelectedPath + "\\";
                     Main.Instance.ManualDownloadsFolder = fbd.SelectedPath + "\\";
+
+                    Properties.Settings.Default.ManualFolderPath = Main.Instance.ManualDownloadsFolder;
+                    Properties.Settings.Default.Save();
                 }
             }
         }
@@ -514,6 +578,9 @@ namespace KtaneManualDownloader
             {
                 mergedPDFPathBox.Text = folderBrowser.FileName;
                 Main.Instance.MergedManualOutputPath = folderBrowser.FileName;
+
+                Properties.Settings.Default.MergedPDFPath = Main.Instance.MergedManualOutputPath;
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -522,6 +589,9 @@ namespace KtaneManualDownloader
             if (e.KeyChar == (char)Keys.Return)
             {
                 Main.Instance.MergedManualOutputPath = mergedPDFPathBox.Text;
+
+                Properties.Settings.Default.MergedPDFPath = Main.Instance.MergedManualOutputPath;
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -530,6 +600,9 @@ namespace KtaneManualDownloader
             if (e.KeyChar == (char)Keys.Enter)
             {
                 Main.Instance.ManualDownloadsFolder = manualDownloadsBox.Text;
+
+                Properties.Settings.Default.ManualFolderPath = Main.Instance.ManualDownloadsFolder;
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -540,20 +613,6 @@ namespace KtaneManualDownloader
                 Main.Instance.ModsFolderLocation = modsFolderBox.Text;
                 LoadMods();
             }
-        }
-
-        private bool AreNoModsSelected()
-        {
-            bool isOneChecked = false;
-            foreach(CheckBox box in modListPanel.Controls)
-            {
-                if(box.Checked)
-                {
-                    isOneChecked = true;
-                    break;
-                }
-            }
-            return isOneChecked;
         }
 
         private void deselectBtn_Click(object sender, EventArgs e)
@@ -570,6 +629,11 @@ namespace KtaneManualDownloader
             {
                 box.Checked = true;
             }
+        }
+
+        private void resetSettingsBtn_Click(object sender, EventArgs e)
+        {
+            ResetSettings();
         }
     }
 }
