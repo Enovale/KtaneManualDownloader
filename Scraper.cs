@@ -37,6 +37,9 @@ namespace KtaneManualDownloader
         public static string ScraperURL = "https://ktane.timwi.de/";
 
         private ChromiumWebBrowser browser;
+        /// <summary>
+        /// Shorthand for the main browser frame since most functions are run from there
+        /// </summary>
         private IFrame frame
         {
             get
@@ -44,6 +47,10 @@ namespace KtaneManualDownloader
                 return browser.GetBrowser().MainFrame;
             }
         }
+        /// <summary>
+        /// We need to make sure this is true before doing anything with the browser
+        /// this is true once the browser has initialized and a document is opened.
+        /// </summary>
         private bool browserReady = false;
 
         public Scraper()
@@ -62,6 +69,12 @@ namespace KtaneManualDownloader
             EnsureBrowserInitialized();
         }
 
+        /// <summary>
+        /// This types a search term into the website's filter bar
+        /// and triggers it to search.
+        /// Doesn't actually get any data
+        /// </summary>
+        /// <param name="term">Should be a Steam ID but can be any valid search term</param>
         public void Search(string term)
         {
             string script = "" + 
@@ -71,11 +84,19 @@ namespace KtaneManualDownloader
             JavascriptResponse _ = frame.EvaluateScriptAsync(script).Result;
         }
 
-        // Need to fix this to get difficulty as well for expert, not defuser
+        /// <summary>
+        /// Extracts all the data of the current search results
+        /// into a list of KtaneModules with all the needed data.
+        /// </summary>
+        /// <param name="searchTerm">Optionally you can search with this function as well.</param>
+        /// <returns>A list of modules containing all needed info.</returns>
         public List<KtaneModule> GetSearchResults(string searchTerm = null)
         {
             if (searchTerm != null) Search(searchTerm);
 
+            // This JS code gets the element that contains the mods,
+            // and filters it to remove the invisible ones, leaving only
+            // our actual search results
             string gatherResults = "" +
             @"var searchResults = [];
 
@@ -90,6 +111,9 @@ namespace KtaneManualDownloader
             document.getElementById('main-table').childNodes[0].childNodes.forEach(handleMod); 
             ";
 
+            // This is a long one, lol. This script goes through the searchResults and 
+            // goes through it's children to get all the data needed for a KtaneModule object.
+            // Note that some mods don't have a video, so the "class != 'info - 1'" checks handle that.
             string extractModInfo = "" +
             @"var modNames = [];
             var modPDFs = [];
@@ -137,9 +161,9 @@ namespace KtaneManualDownloader
             searchResults.forEach(extractInfo);
             ";
 
+            // All this just gets the JS objects and puts em into C#. (Perhaps this can be optimized?)
             JavascriptResponse _ = frame.EvaluateScriptAsync(gatherResults).Result;
             JavascriptResponse __ = frame.EvaluateScriptAsync(extractModInfo).Result;
-            //browser.ScreenshotAsync().Result.Save("test.png");
 
             List<object> modNamesObj = (List<object>)frame.EvaluateScriptAsync("modNames;").Result.Result;
             List<object> modPDFsObj = (List<object>)frame.EvaluateScriptAsync("modPDFs;").Result.Result;
@@ -163,6 +187,11 @@ namespace KtaneManualDownloader
             return finalList;
         }
 
+        /// <summary>
+        /// Download the PDF at the URL into memory and open it as a PdfDocument.
+        /// </summary>
+        /// <param name="url">Link to the PDF, likely a manual. (Must be a PDF.)</param>
+        /// <returns>A PdfDocument in Import mode, opened from the URL</returns>
         public PdfDocument DownloadManual(string url)
         {
             PdfDocument inputDocument = null;
@@ -214,6 +243,9 @@ namespace KtaneManualDownloader
             }
         }
 
+        /// <summary>
+        /// Wait until the browser is ready.
+        /// </summary>
         public void EnsureBrowserInitialized()
         {
             while (!browserReady)

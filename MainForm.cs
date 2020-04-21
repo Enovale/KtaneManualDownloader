@@ -36,12 +36,16 @@ namespace KtaneManualDownloader
         {
             LoadSettings();
 
+            // Load whatever settings or defaults into the UI and update the mod list.
             mergedPDFPathBox.Text = Main.Instance.MergedManualOutputPath;
             manualDownloadsBox.Text = Main.Instance.ManualDownloadsFolder;
             modsFolderBox.Text = Main.Instance.ModsFolderLocation;
             LoadMods();
         }
 
+        /// <summary>
+        /// Loads the saved settings, or sets them to the defaults if they're empty
+        /// </summary>
         public void LoadSettings()
         {
             if(!string.IsNullOrEmpty(Properties.Settings.Default.ModFolderPath))
@@ -70,6 +74,9 @@ namespace KtaneManualDownloader
             Properties.Settings.Default.Save();
         }
 
+        /// <summary>
+        /// Resets all settings to default.
+        /// </summary>
         public void ResetSettings()
         {
             modsFolderBox.Text = "";
@@ -84,6 +91,10 @@ namespace KtaneManualDownloader
             modListPanel.Controls.Clear();
         }
 
+        /// <summary>
+        /// Update the UI Panel with the mods given
+        /// </summary>
+        /// <param name="modList">An array of mod names.</param>
         public void LoadModList(string[] modList)
         {
             modListPanel.Controls.Clear();
@@ -101,7 +112,12 @@ namespace KtaneManualDownloader
             }
         }
 
-        public void LoadMods(string modsFolder = null)
+        /// <summary>
+        /// Goes through the KTaNE mod directory in Main, goes through each mod,
+        /// extracts it's name, Steam ID, updates the Main.CurrentModList with this data,
+        /// and updates the UI.
+        /// </summary>
+        public void LoadMods()
         {
             if ((Main.Instance.ModsFolderLocation ?? "").Trim() == "") return;
             if (!Main.Instance.IsFolderKtane(Main.Instance.ModsFolderLocation)) return;
@@ -131,6 +147,10 @@ namespace KtaneManualDownloader
             LoadModList(modNameList.ToArray());
         }
 
+        /// <summary>
+        /// Method to update the progress bar so we can invoke it from another thread
+        /// </summary>
+        /// <param name="percentage">0-100%</param>
         public void SetProgressBar(int percentage)
         {
             progressBar.Value = percentage;
@@ -167,9 +187,7 @@ namespace KtaneManualDownloader
         {
             if (modListPanel.Controls.Count <= 0 || !AreNoModsSelected())
             {
-                MethodInvoker enableControlsFailure = new MethodInvoker(() =>
-                    ToggleControlsDuringDownload(true));
-                Invoke(enableControlsFailure);
+                Invoke(new MethodInvoker(() => ToggleControlsDuringDownload(true)));
                 return;
             }
             Directory.CreateDirectory(Main.Instance.ManualDownloadsFolder);
@@ -178,12 +196,8 @@ namespace KtaneManualDownloader
             {
                 if(cancelWork)
                 {
-                    MethodInvoker enableControlsCancelled = new MethodInvoker(() =>
-                        ToggleControlsDuringDownload(true));
-                    Invoke(enableControlsCancelled);
-                    MethodInvoker clearProgress = new MethodInvoker(() =>
-                        SetProgressBar(0));
-                    progressBar.Invoke(clearProgress);
+                    Invoke(new MethodInvoker(() => ToggleControlsDuringDownload(true)));
+                    Invoke(new MethodInvoker(() => SetProgressBar(0)));
                     cancelWork = false;
                     return;
                 }
@@ -203,18 +217,13 @@ namespace KtaneManualDownloader
                     PdfDocument manual = Scraper.Instance.DownloadManual(module.ManualURL);
                     manual.Save(Main.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf");
                 }
-                MethodInvoker progressUpdate = new MethodInvoker(() => 
-                    SetProgressBar((int)((float)i / modListPanel.Controls.Count * 100)));
-                progressBar.Invoke(progressUpdate);
+                Invoke(new MethodInvoker(() => SetProgressBar(
+                    (int)((float)i / modListPanel.Controls.Count * 100))));
             }
             File.WriteAllText(Main.Instance.ManualJSONPath, 
                 JsonConvert.SerializeObject(moduleList));
-            MethodInvoker reenableControls = new MethodInvoker(() =>
-                ToggleControlsDuringDownload(true));
-            Invoke(reenableControls);
-            MethodInvoker clearProgressBar = new MethodInvoker(() =>
-                SetProgressBar(0));
-            progressBar.Invoke(clearProgressBar);
+            Invoke(new MethodInvoker(() => ToggleControlsDuringDownload(true)));
+            Invoke(new MethodInvoker(() => SetProgressBar(0)));
 
             if (mergeCheck.Checked) MergeManuals();
         }
@@ -225,9 +234,7 @@ namespace KtaneManualDownloader
 
             if (modListPanel.Controls.Count <= 0 || !AreNoModsSelected())
             {
-                MethodInvoker enableControlsFailure = new MethodInvoker(() =>
-                    ToggleControlsDuringDownload(true));
-                Invoke(enableControlsFailure);
+                Invoke(new MethodInvoker(() => ToggleControlsDuringDownload(true)));
                 return;
             }
 
@@ -361,12 +368,8 @@ namespace KtaneManualDownloader
                     //bool appendix = pageContent.FirstOrDefault(s => s.ToLower().Contains("appendix")) != null;
                     if (cancelWork)
                     {
-                        MethodInvoker enableControlsCancelled = new MethodInvoker(() =>
-                            ToggleControlsDuringDownload(true));
-                        Invoke(enableControlsCancelled);
-                        MethodInvoker clearProgress = new MethodInvoker(() =>
-                            SetProgressBar(0));
-                        progressBar.Invoke(clearProgress);
+                        Invoke(new MethodInvoker(() => ToggleControlsDuringDownload(true)));
+                        Invoke(new MethodInvoker(() => SetProgressBar(0)));
                         cancelWork = false;
                         return;
                     }
@@ -374,9 +377,7 @@ namespace KtaneManualDownloader
                 }
                 moduleManual.Dispose();
                 int i = modules.IndexOf(module);
-                MethodInvoker progressUpdate = new MethodInvoker(() =>
-                    SetProgressBar((int)((float)i / modules.Count * 100)));
-                progressBar.Invoke(progressUpdate);
+                Invoke(new MethodInvoker(() => SetProgressBar((int)((float)i / modules.Count * 100))));
             }
 
             if(vanillaMergeCheck.Checked)
@@ -397,9 +398,7 @@ namespace KtaneManualDownloader
             string errorMessage = "";
             if (mergedDocument.CanSave(ref errorMessage))
             {
-                MethodInvoker progressUpdate = new MethodInvoker(() =>
-                    SetProgressBar(100));
-                progressBar.Invoke(progressUpdate);
+                Invoke(new MethodInvoker(() => SetProgressBar(100)));
                 mergedDocument.Save(Main.Instance.MergedManualOutputPath);
             }
             else
@@ -410,12 +409,8 @@ namespace KtaneManualDownloader
             mergedDocument.Dispose();
             modules = null;
 
-            MethodInvoker reenableControls = new MethodInvoker(() =>
-                ToggleControlsDuringDownload(true));
-            Invoke(reenableControls);
-            MethodInvoker clearProgressBar = new MethodInvoker(() =>
-                SetProgressBar(0));
-            progressBar.Invoke(clearProgressBar);
+            Invoke(new MethodInvoker(() => ToggleControlsDuringDownload(true)));
+            Invoke(new MethodInvoker(() => SetProgressBar(0)));
             cancelWork = false;
         }
 
