@@ -443,10 +443,10 @@ namespace KtaneManualDownloader
             switch (sortMode)
             {
                 case Settings.SortMode.Mod:
-                    modules = modules.OrderBy(mod => mod.ModName).ToList();
+                    modules.Sort((x, y) => SmartCompare(x.ModName, y.ModName));
                     break;
                 case Settings.SortMode.Module:
-                    modules = modules.OrderBy(mod => mod.ModuleName).ToList();
+                    modules.Sort((x, y) => SmartCompare(x.ModuleName, y.ModuleName));
                     break;
                 case Settings.SortMode.Difficulty:
                     List<List<KtaneModule>> groupedList = modules.GroupBy(mod => mod.Difficulty)
@@ -456,7 +456,8 @@ namespace KtaneManualDownloader
                     List<KtaneModule> sortedList = new List<KtaneModule>();
                     foreach (List<KtaneModule> list in groupedList)
                     {
-                        sortedList.AddRange(list.OrderBy(mod => mod.ModuleName).ToList());
+                        list.Sort((x, y) => SmartCompare(x.ModuleName, y.ModuleName));
+                        sortedList.AddRange(list);
                     }
                     modules = sortedList;
                     break;
@@ -477,6 +478,20 @@ namespace KtaneManualDownloader
                 }
             }
             return isOneChecked;
+        }
+
+        private static Regex smartCompareExpression
+        = new Regex(@"^(?:A |The )\s*",
+            RegexOptions.Compiled |
+            RegexOptions.CultureInvariant |
+            RegexOptions.IgnoreCase);
+
+        public static Int32 SmartCompare(String x, String y)
+        {
+            x = smartCompareExpression.Replace(x, "");
+            y = smartCompareExpression.Replace(y, "");
+
+            return x.CompareTo(y);
         }
     }
 }
