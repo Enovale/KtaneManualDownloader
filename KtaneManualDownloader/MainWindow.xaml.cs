@@ -72,6 +72,10 @@ namespace KtaneManualDownloader
                 mod.IsEnabled = state;
             }
 
+            DeselectBtn.IsEnabled = state;
+            SelectBtn.IsEnabled = state;
+            ResetSettingsBtn.IsEnabled = state;
+
             //downloadBtn.Enabled = state;
             MergeBtn.IsEnabled = state;
             RedownloadCheck.IsEnabled = state;

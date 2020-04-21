@@ -156,19 +156,19 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Include="VanillaDocuments\Cover.pdf">
+    <None Include="Resources\VanillaDocuments\Cover.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="VanillaDocuments\Intro.pdf">
+    <None Include="Resources\VanillaDocuments\Intro.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="VanillaDocuments\ModuleSpacer.pdf">
+    <None Include="Resources\VanillaDocuments\ModuleSpacer.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="VanillaDocuments\NeedySpacer.pdf">
+    <None Include="Resources\VanillaDocuments\NeedySpacer.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Include="VanillaDocuments\VanillaAppendix.pdf">
+    <None Include="Resources\VanillaDocuments\VanillaAppendix.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -190,6 +190,7 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

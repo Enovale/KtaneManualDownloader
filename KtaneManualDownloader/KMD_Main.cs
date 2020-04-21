@@ -20,14 +20,21 @@ namespace KtaneManualDownloader
         public static MainWindow Window;
 
         #region Path Vars
+        public string ResourcesPath = Path.GetFullPath("./Resources/");
         public string ManualJSONPath
         {
             get
             {
-                return Settings.Instance.ManualDownloadsFolder + "modules.json";
+                return Path.Combine(ResourcesPath, "modules.json");
             }
         }
-        public string VanillaDocsPath = Path.GetFullPath("./VanillaDocuments/");
+        public string VanillaDocsPath
+        {
+            get
+            {
+                return Path.Combine(ResourcesPath, "VanillaDocuments");
+            }
+        }
         public string CoverPath
         {
             get
@@ -164,13 +171,32 @@ namespace KtaneManualDownloader
             {
                 string steamID = new DirectoryInfo(dir).Name;
                 JObject modInfo = JObject.Parse(File.ReadAllText(dir + "/modInfo.json"));
-                unsortedList.Add(new KtaneMod(modInfo["title"].ToString(), steamID));
+
+                var searchResults = Scraper.Instance.GetSearchResults(steamID);
+                unsortedList.Add(new KtaneMod(modInfo["title"].ToString(), steamID, searchResults.ToArray()));
             }
 
             var sortedList = unsortedList.OrderBy(mod => mod.ModName);
             foreach(KtaneMod mod in sortedList)
             {
                 ModList.Add(mod);
+            }
+
+            UpdateDownloadStatus();
+        }
+
+        public void UpdateDownloadStatus()
+        {
+            if (!Directory.Exists(Settings.Instance.ManualDownloadsFolder)) return;
+            DirectoryInfo manualDir = new DirectoryInfo(Settings.Instance.ManualDownloadsFolder);
+            foreach(KtaneMod mod in ModList)
+            {
+                bool allDownloaded = mod.Modules.ToList().FindAll(module =>
+                {
+                    return File.Exists(Settings.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf");
+                }).Count == mod.Modules.Length;
+
+                if (allDownloaded) mod.IsDownloaded = true;
             }
         }
 
@@ -199,8 +225,8 @@ namespace KtaneManualDownloader
                     return;
                 }
                 if (!ModList[i].IsSelected) continue;
-                var searchResults = Scraper.Instance.GetSearchResults(ModList[i].SteamID);
-                foreach (KtaneModule module in searchResults)
+                var modModules = ModList[i].Modules;
+                foreach (KtaneModule module in modModules)
                 {
                     module.ModName = ModList[i].ModName;
                     moduleList.Add(module);
@@ -214,6 +240,7 @@ namespace KtaneManualDownloader
                     PdfDocument manual = Scraper.Instance.DownloadManual(module.ManualURL);
                     manual.Save(Settings.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf");
                 }
+                ModList[i].IsDownloaded = true;
                 SetProgressBar((int)((float)i / ModList.Count * 100));
             }
             File.WriteAllText(ManualJSONPath,
