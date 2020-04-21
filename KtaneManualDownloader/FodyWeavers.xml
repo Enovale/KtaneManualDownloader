@@ -5,6 +5,8 @@
         PdfSharp
         PdfSharp.*
         Newtonsoft.Json
+        Microsoft.*
+        Atlas.UI
       </IncludeAssemblies>
     </Costura>
 </Weavers>

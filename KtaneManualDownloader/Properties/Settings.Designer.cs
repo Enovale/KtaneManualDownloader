@@ -62,9 +62,9 @@ namespace KtaneManualDownloader.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("1")]
-        public int SortMode {
+        public string SortMode {
             get {
-                return ((int)(this["SortMode"]));
+                return ((string)(this["SortMode"]));
             }
             set {
                 this["SortMode"] = value;

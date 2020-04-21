@@ -2,75 +2,17 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace KtaneManualDownloader
 {
-    class Main
+    public static class PathChecks
     {
 
-        public static Main Instance;
-
-        #region Path Vars
-        public string ModsFolderLocation;
-        public string ManualDownloadsFolder = Path.GetFullPath("./Manuals/");
-        public string ManualJSONPath
-        {
-            get
-            {
-                return ManualDownloadsFolder + "modules.json";
-            }
-        }
-        public string MergedManualOutputPath = "./MergedDocument.pdf";
-
-        public string VanillaDocsPath = Path.GetFullPath("./VanillaDocuments/");
-        public string CoverPath
-        {
-            get
-            {
-                return VanillaDocsPath + "Cover.pdf";
-            }
-        }
-        public string IntroPath
-        {
-            get
-            {
-                return VanillaDocsPath + "Intro.pdf";
-            }
-        }
-        public string ModuleSpacerPath
-        {
-            get
-            {
-                return VanillaDocsPath + "ModuleSpacer.pdf";
-            }
-        }
-        public string NeedySpacerPath
-        {
-            get
-            {
-                return VanillaDocsPath + "NeedySpacer.pdf";
-            }
-        }
-        public string AppendixPath
-        {
-            get
-            {
-                return VanillaDocsPath + "VanillaAppendix.pdf";
-            }
-        }
-        #endregion
-
-        public List<string> CurrentModList = new List<string>();
-
-        public Main()
-        {
-            Instance = this;
-            new Scraper();
-        }
-
-        public bool IsFolderKtane(string modFolder)
+        public static bool IsFolderKtane(string modFolder)
         {
             try
             {
@@ -106,12 +48,12 @@ namespace KtaneManualDownloader
             return false;
         }
 
-        public string MakeValidPath(string filename)
+        public static string MakeValidPath(string filename)
         {
             return string.Concat(filename.Split(Path.GetInvalidPathChars()));
         }
 
-        private bool IsValidPath(string path)
+        private static bool IsValidPath(string path)
         {
             Regex driveCheck = new Regex(@"^[a-zA-Z]:\\$");
             if (!driveCheck.IsMatch(path.Substring(0, 3))) return false;
@@ -123,6 +65,5 @@ namespace KtaneManualDownloader
 
             return true;
         }
-
     }
 }

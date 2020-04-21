@@ -1,0 +1,327 @@
+﻿<atlas:Window x:Class="KtaneManualDownloader.MainWindow"
+              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+              xmlns:local="clr-namespace:KtaneManualDownloader"
+              xmlns:atlas="clr-namespace:Atlas.UI;assembly=Atlas.UI"
+              Title="KTaNE Manual Downloader"
+              Width="900"
+              Height="550"
+              CanResize="False"
+              Loaded="MainWindow_Loaded">
+    <Window.Resources >
+        <BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0"
+                Margin="4"
+                BorderBrush="Black"
+                BorderThickness="1">
+            <ListView Name="ModListPanel" 
+                      ItemsSource="{Binding ModList}" 
+                      Background="{x:Null}"
+                      HorizontalContentAlignment="Stretch">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <atlas:CheckBox Grid.Column="0"
+                                            IsChecked="{Binding IsSelected, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                            IsEnabled="{Binding IsEnabled}"
+                                            Content="{Binding ModName}" 
+                                            Foreground="White">
+                            </atlas:CheckBox>
+                            <Label Grid.Column="1"
+                                   Content="✔️ Downloaded"
+                                   Visibility="{Binding IsDownloaded, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                   Foreground="Green" 
+                                   ToolTip="The manuals for all modules in this mod have been downloaded."/>
+                            <Label Grid.Column="1"
+                                   Content="❌ No Manual for this mod"
+                                   Visibility="{Binding NoManual, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                   Foreground="Red" 
+                                   ToolTip="This mod contains no modules or otherwise wasn't found in the database."/>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Border>
+
+        <Grid Grid.Row="1"
+              Margin="4,0,4,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <atlas:Button Name="DeselectBtn"
+                          Grid.Column="0"
+                          Margin="0,0,1,1"
+                          Click="DeselectBtn_Click"
+                          Content="Deselect All" />
+
+            <atlas:Button Name="SelectBtn"
+                          Grid.Column="1"
+                          Width="61.6"
+                          Margin="4,0,0,1"
+                          Click="SelectBtn_Click"
+                          Content="Select All" />
+
+            <!--Width="200"-->
+            <atlas:ProgressBar Name="ProgressBar" 
+                                Grid.Column="2"
+                                Value="{Binding DownloadProgress, UpdateSourceTrigger=PropertyChanged}"
+                                Minimum="0"
+                                Maximum="100"
+                                Width="Auto"
+                                Height="24"
+                                Margin="4,2,0,2"
+                                Padding="0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Center" />
+
+            <atlas:Button Name="ResetSettingsBtn"
+                          Grid.Column="3"
+                          Margin="4,0,1,1"
+                          Click="ResetSettingsBtn_Click"
+                          Content="Reset Settings" />
+        </Grid>
+
+        <Grid Grid.Row="2"
+              Margin="4,0,0,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="385" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="125" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0"
+                  VerticalAlignment="Bottom">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               Foreground="#CCC"
+                               Text="Merged PDF path" />
+
+                    <atlas:TextBox Name="MergedPDFPathBox"
+                                    Grid.Column="1"
+                                    Margin="8,0,0,0"
+                                    HorizontalAlignment="Stretch"
+                                    Text="{Binding MergedManualOutputPath, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Placeholder="Browse for a path..."
+                                    ShowPlaceholder="True" 
+                                    KeyDown="MergedPDFPathBox_KeyPress"/>
+
+                    <atlas:Button Name="MergedPDFPathBtn" 
+                                   Grid.Column="2"
+                                   Margin="2,0,0,0"
+                                   Click="MergedPDFPathBtn_Click"
+                                   Content="..." />
+                </Grid>
+
+                <Grid Grid.Row="1"
+                      Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               Foreground="#CCC"
+                               Text="Manual downloads" />
+
+                    <atlas:TextBox Name="ManualDownloadsBox"
+                                    Grid.Column="1"
+                                    Margin="8,0,0,0"
+                                    HorizontalAlignment="Stretch"
+                                    Text="{Binding ManualDownloadsFolder, Mode=TwoWay}"
+                                    Placeholder="Browse for a path..."
+                                    ShowPlaceholder="True" 
+                                    KeyDown="ManualDownloadsBox_KeyPress"/>
+
+                    <atlas:Button Name="ManualDownloadsBtn" 
+                                   Grid.Column="2"
+                                   Margin="2,0,0,0"
+                                   Click="ManualDownloadsBtn_Click"
+                                   Content="..." />
+                </Grid>
+
+                <Grid Grid.Row="2"
+                      Margin="0,4,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Column="0"
+                               HorizontalAlignment="Left"
+                               VerticalAlignment="Center"
+                               Foreground="#CCC"
+                               Text="KTaNE mods folder" />
+
+                    <atlas:TextBox Name="ModsFolderBox"
+                                    Grid.Column="1"
+                                    Margin="8,0,0,0"
+                                    HorizontalAlignment="Stretch"
+                                    Text="{Binding ModsFolderLocation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Placeholder="Browse for a path..."
+                                    ShowPlaceholder="True" 
+                                    KeyDown="ModsFolderBox_KeyPress"/>
+
+                    <atlas:Button Name="SelectModsDirBtn" 
+                                   Grid.Column="2"
+                                   Margin="2,0,0,0"
+                                   Click="SelectModsDirBtn_Click"
+                                   Content="..." />
+                </Grid>
+            </Grid>
+
+            <StackPanel Grid.Column="1"
+                        Margin="16,0,0,4"
+                        VerticalAlignment="Bottom">
+                <atlas:Button Name="MergeBtn" Margin="0,0,0,0"
+                              Content="Merge Only" Click="MergeBtn_Click"/>
+                <atlas:Button Name="DownloadBtn" Margin="0,4,0,0"
+                               Content="Download" Click="DownloadBtn_Click"/>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2"
+                        Margin="6,0,0,0"
+                        VerticalAlignment="Bottom">
+                <atlas:CheckBox Name="RedownloadCheck" 
+                                IsChecked="{Binding ForceRedownload, Mode=TwoWay}"
+                                Content="Force Redownload">
+                    <atlas:CheckBox.ToolTip>
+                        <ToolTip>
+                            <TextBlock>
+                                Even if a manual has already been downloaded, force it to redownload.
+                            </TextBlock>
+                        </ToolTip>
+                    </atlas:CheckBox.ToolTip>
+                </atlas:CheckBox>
+                <atlas:CheckBox Name="VanillaMergeCheck" 
+                                IsChecked="{Binding VanillaMerge, Mode=TwoWay}"
+                                Content="Merge Vanilla">
+                    <atlas:CheckBox.ToolTip>
+                        <ToolTip>
+                            <TextBlock>
+                                Merge in the vanilla cover page, intro, and appendixes as well.
+                                <LineBreak />
+                                This does not merge in vanilla modules. Vanilla PDFs can be edited
+                                <LineBreak />
+                                from ./Resources/VanillaDocuments to remove watermarks or edit them.
+                            </TextBlock>
+                        </ToolTip>
+                    </atlas:CheckBox.ToolTip>
+                </atlas:CheckBox>
+                <atlas:CheckBox Name="ReverseOrderCheck" 
+                                IsChecked="{Binding ReverseOrder, Mode=TwoWay}"
+                                Content="Reverse Order" 
+                                ToolTip="Reverses the order of all other specified settings."/>
+                <atlas:CheckBox Name="MergeCheck"
+                                IsChecked="{Binding MergePDFs, Mode=TwoWay}"
+                                Content="Merge PDFs"
+                                Checked="MergeCheck_Checked" 
+                                Unchecked="MergeCheck_Unchecked">
+                    <atlas:CheckBox.ToolTip>
+                        <ToolTip>
+                            <TextBlock>
+                                If this is selected, after downloading, the PDFs will be merged together
+                                <LineBreak />
+                                into one big PDF at the path specified. The individual PDFs will not be removed.
+                            </TextBlock>
+                        </ToolTip>
+                    </atlas:CheckBox.ToolTip>
+                </atlas:CheckBox>
+            </StackPanel>
+
+            <Grid Grid.Column="3"
+                  HorizontalAlignment="Right">
+                <Grid Margin="0,0,10,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0"
+                               Grid.ColumnSpan="2"
+                               HorizontalAlignment="Center"
+                               Foreground="#CCC"
+                               Text="Alphabetical:" />
+
+                    <atlas:RadioButton Name="ModMergeRadio" 
+                                        Grid.Row="1"
+                                        Grid.Column="0"
+                                        HorizontalAlignment="Left"
+                                        IsChecked="{Binding ModMerge, Mode=TwoWay}"
+                                        Content="Sort by mod name" />
+
+                    <atlas:RadioButton Name="ModuleMergeRadio"
+                                        Grid.Row="1"
+                                        Grid.Column="1"
+                                        HorizontalAlignment="Right"
+                                        IsChecked="{Binding ModuleMerge, Mode=TwoWay}"
+                                        Content="Sort by module name" />
+
+                    <TextBlock Grid.Row="3"
+                               Grid.ColumnSpan="2"
+                               HorizontalAlignment="Center"
+                               Foreground="#CCC"
+                               Text="Other:" />
+
+
+                    <atlas:RadioButton Name="DiffMergeRadio"
+                                        Grid.Row="4"
+                                        Grid.Column="0"
+                                        HorizontalAlignment="Left"
+                                        IsChecked="{Binding DifficultyMerge, Mode=TwoWay}"
+                                        Content="Sort by difficulty" />
+
+                    <atlas:CheckBox Name="ModuleGroupCheck" 
+                                     Grid.Row="4"
+                                     Grid.Column="1"
+                                     Margin="8,0,0,0"
+                                     HorizontalAlignment="Right"
+                                        IsChecked="{Binding GroupByType, Mode=TwoWay}"
+                                     Content="Group by module type" />
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</atlas:Window>
