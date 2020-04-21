@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Win32;
+using Microsoft.WindowsAPICodePack.Dialogs;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
@@ -16,14 +18,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace KtaneManualDownloader
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Atlas.UI.Window
     {
 
         public enum SortMode
@@ -50,6 +51,8 @@ namespace KtaneManualDownloader
             manualDownloadsBox.Text = Main.Instance.ManualDownloadsFolder;
             modsFolderBox.Text = Main.Instance.ModsFolderLocation;
             LoadMods();
+
+            mergeCheck.IsChecked = true;
         }
 
         public void LoadSettings()
@@ -103,7 +106,7 @@ namespace KtaneManualDownloader
                 CheckBox modEntry = new CheckBox
                 {
                     Content = mod,
-                    Margin = new Thickness(5, i * Height, modListPanel.Width - 25, Height),
+                    Margin = new Thickness(5, i * 16, modListPanel.ActualWidth - 25, 16),
                     IsChecked = true
                 };
                 modListPanel.Children.Add(modEntry);
@@ -154,7 +157,19 @@ namespace KtaneManualDownloader
             else
             {
                 ToggleControlsDuringDownload(false);
-                Task.Run(DownloadManuals);
+                //DownloadManuals();
+                Task.Run(() =>
+                {
+                    if (modListPanel.Children.OfType<CheckBox>().Count() <= 0 || !AreNoModsSelected())
+                    {
+                        progressBar.Dispatcher.Invoke(() => ToggleControlsDuringDownload(true));
+                        return;
+                    }
+                    Directory.CreateDirectory(Main.Instance.ManualDownloadsFolder);
+                    progressBar.Dispatcher.Invoke(() => ToggleControlsDuringDownload(true));
+                    progressBar.Dispatcher.Invoke(() => SetProgressBar(100));
+                });
+                //Task.Run(DownloadManuals);
             }
         }
 
@@ -173,7 +188,7 @@ namespace KtaneManualDownloader
 
         private void DownloadManuals()
         {
-            if (modListPanel.Children.Count <= 0 || !AreNoModsSelected())
+            if (modListPanel.Children.OfType<CheckBox>().Count() <= 0 || !AreNoModsSelected())
             {
                 progressBar.Dispatcher.Invoke(() => ToggleControlsDuringDownload(true));
                 return;
@@ -189,13 +204,13 @@ namespace KtaneManualDownloader
                     cancelWork = false;
                     return;
                 }
-                if (!((CheckBox)modListPanel.Children[i]).IsChecked.Value) continue;
+                if (!(bool)((CheckBox)modListPanel.Children[i]).IsChecked) continue;
                 var searchResults = Scraper.Instance.GetSearchResults(Main.Instance.CurrentModList[i]);
                 foreach (KtaneModule module in searchResults)
                 {
                     module.ModName = ((CheckBox)(modListPanel.Children[i])).Content.ToString();
                     moduleList.Add(module);
-                    if (!redownloadCheck.IsChecked)
+                    if (!(bool)redownloadCheck.IsChecked)
                     {
                         if (File.Exists((Main.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf")))
                         {
@@ -212,7 +227,7 @@ namespace KtaneManualDownloader
             progressBar.Dispatcher.Invoke(() => ToggleControlsDuringDownload(true));
             progressBar.Dispatcher.Invoke(() => SetProgressBar(0));
 
-            if (mergeCheck.IsChecked) MergeManuals();
+            if ((bool)mergeCheck.IsChecked) MergeManuals();
         }
 
         private void MergeManuals()
@@ -246,7 +261,7 @@ namespace KtaneManualDownloader
             JArray modulesJSON = JArray.Parse(unformattedJSON);
             List<KtaneModule> modules = modulesJSON.ToObject<List<KtaneModule>>();
             modules = SortModuleList(sortMode, modules);
-            if (moduleGroupCheck.IsChecked)
+            if ((bool)moduleGroupCheck.IsChecked)
             {
                 List<List<KtaneModule>> groupedList = modules.GroupBy(mod => mod.Type)
                     .Select(grp => grp.ToList())
@@ -259,12 +274,12 @@ namespace KtaneManualDownloader
                 }
                 modules = sortedList;
             }
-            if (reverseOrderCheck.IsChecked) modules.Reverse();
+            if ((bool)reverseOrderCheck.IsChecked) modules.Reverse();
 
             // Remove unchecked mods
             foreach (CheckBox modCheck in modListPanel.Children)
             {
-                if (!modCheck.IsChecked.Value)
+                if (!(bool)modCheck.IsChecked)
                 {
                     modules.RemoveAll(mod => mod.ModName == (string)modCheck.Content);
                 }
@@ -272,7 +287,7 @@ namespace KtaneManualDownloader
 
             PdfDocument mergedDocument = new PdfDocument();
 
-            if (vanillaMergeCheck.IsChecked)
+            if ((bool)vanillaMergeCheck.IsChecked)
             {
                 if (File.Exists(Main.Instance.CoverPath))
                 {
@@ -303,7 +318,7 @@ namespace KtaneManualDownloader
             bool addedNeedySpacer = false;
             foreach (KtaneModule module in modules)
             {
-                if (moduleGroupCheck.IsChecked)
+                if ((bool)moduleGroupCheck.IsChecked)
                 {
                     if (module.Type == Scraper.ModuleType.Regular)
                     {
@@ -365,7 +380,7 @@ namespace KtaneManualDownloader
                 progressBar.Dispatcher.Invoke(() => SetProgressBar((int)((float)i / modules.Count * 100)));
             }
 
-            if (vanillaMergeCheck.IsChecked)
+            if ((bool)vanillaMergeCheck.IsChecked)
             {
                 if (File.Exists(Main.Instance.AppendixPath))
                 {
@@ -428,11 +443,11 @@ namespace KtaneManualDownloader
 
         private SortMode DetermineSortMode()
         {
-            if (modMergeRadio.IsChecked)
+            if ((bool)modMergeRadio.IsChecked)
             {
                 return SortMode.Mod;
             }
-            else if (moduleMergeRadio.IsChecked)
+            else if ((bool)moduleMergeRadio.IsChecked)
             {
                 return SortMode.Module;
             }
@@ -471,7 +486,7 @@ namespace KtaneManualDownloader
             manualDownloadsBox.IsEnabled = state;
             manualDownloadsBtn.IsEnabled = state;
             if (state)
-                mergeCheck_CheckedChanged(null, null);
+                ToggleMergeControls((bool)mergeCheck.IsChecked);
         }
 
         private void ToggleMergeControls(bool state)
@@ -489,15 +504,157 @@ namespace KtaneManualDownloader
         private bool AreNoModsSelected()
         {
             bool isOneChecked = false;
-            foreach (CheckBox box in modListPanel.Children)
+            foreach (CheckBox box in modListPanel.Children.OfType<CheckBox>())
             {
-                if (box.IsChecked.Value)
+                if ((bool)box.IsChecked)
                 {
                     isOneChecked = true;
                     break;
                 }
             }
             return isOneChecked;
+        }
+
+        private void mergeCheck_Checked(object sender, EventArgs e) 
+        {
+            ToggleMergeControls(true); 
+        }
+        private void mergeCheck_Unchecked(object sender, EventArgs e) { ToggleMergeControls(false); }
+
+        private void selectModsDirBtn_Click(object sender, EventArgs e)
+        {
+            if(!CommonOpenFileDialog.IsPlatformSupported)
+            {
+                using (var fbd = new System.Windows.Forms.FolderBrowserDialog())
+                {
+                    System.Windows.Forms.DialogResult result = fbd.ShowDialog();
+
+                    if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                    {
+                        modsFolderBox.Text = fbd.SelectedPath;
+                        Main.Instance.ModsFolderLocation = fbd.SelectedPath;
+                    }
+                }
+            }
+            else
+            {
+                using (var fbd = new CommonOpenFileDialog())
+                {
+                    fbd.IsFolderPicker = true;
+
+                    CommonFileDialogResult result = fbd.ShowDialog();
+                    if(result == CommonFileDialogResult.Ok && !string.IsNullOrWhiteSpace(fbd.FileName))
+                    {
+                        modsFolderBox.Text = fbd.FileName;
+                        Main.Instance.ModsFolderLocation = fbd.FileName;
+                    }
+                }
+            }
+            LoadMods();
+        }
+
+        private void manualDownloadsBtn_Click(object sender, EventArgs e)
+        {
+            if (!CommonOpenFileDialog.IsPlatformSupported)
+            {
+                using (var fbd = new System.Windows.Forms.FolderBrowserDialog())
+                {
+                    System.Windows.Forms.DialogResult result = fbd.ShowDialog();
+
+                    if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                    {
+                        manualDownloadsBox.Text = fbd.SelectedPath;
+                        Main.Instance.ManualDownloadsFolder = fbd.SelectedPath;
+                    }
+                }
+            }
+            else
+            {
+                using (var fbd = new CommonOpenFileDialog())
+                {
+                    fbd.IsFolderPicker = true;
+
+                    CommonFileDialogResult result = fbd.ShowDialog();
+                    if (result == CommonFileDialogResult.Ok && !string.IsNullOrWhiteSpace(fbd.FileName))
+                    {
+                        manualDownloadsBox.Text = fbd.FileName;
+                        Main.Instance.ManualDownloadsFolder = fbd.FileName;
+                    }
+                }
+            }
+        }
+
+        private void mergedPDFPathBtn_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog folderBrowser = new OpenFileDialog
+            {
+                CheckFileExists = false,
+                CheckPathExists = true,
+                Title = "Selected where to output the merged PDF",
+                InitialDirectory = Path.GetDirectoryName(Application.ResourceAssembly.Location),
+                FileName = Path.GetFileName(Main.Instance.MergedManualOutputPath),
+                Filter = "PDF files (*.pdf)|*.pdf|All files (*.*)|*.*"
+        };
+            if (folderBrowser.ShowDialog() == true)
+            {
+                mergedPDFPathBox.Text = folderBrowser.FileName;
+                Main.Instance.MergedManualOutputPath = folderBrowser.FileName;
+
+                Properties.Settings.Default.MergedPDFPath = Main.Instance.MergedManualOutputPath;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        private void mergedPDFPathBox_KeyPress(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                Main.Instance.MergedManualOutputPath = mergedPDFPathBox.Text;
+
+                Properties.Settings.Default.MergedPDFPath = Main.Instance.MergedManualOutputPath;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        private void manualDownloadsBox_KeyPress(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                Main.Instance.ManualDownloadsFolder = manualDownloadsBox.Text;
+
+                Properties.Settings.Default.ManualFolderPath = Main.Instance.ManualDownloadsFolder;
+                Properties.Settings.Default.Save();
+            }
+        }
+
+        private void modsFolderBox_KeyPress(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Return)
+            {
+                Main.Instance.ModsFolderLocation = modsFolderBox.Text;
+                LoadMods();
+            }
+        }
+
+        private void deselectBtn_Click(object sender, EventArgs e)
+        {
+            foreach (CheckBox box in modListPanel.Children)
+            {
+                box.IsChecked = false;
+            }
+        }
+
+        private void selectBtn_Click(object sender, EventArgs e)
+        {
+            foreach (CheckBox box in modListPanel.Children)
+            {
+                box.IsChecked = true;
+            }
+        }
+
+        private void resetSettingsBtn_Click(object sender, EventArgs e)
+        {
+            ResetSettings();
         }
     }
 }
