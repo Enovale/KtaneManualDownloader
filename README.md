@@ -26,6 +26,5 @@ Please note that this in in-dev software made by an inexperienced dev, so bugs a
 # TODO:
 1. ~~Make append(ixes) work~~ This has been scrapped but maybe ill fix it someday
 2. Write a tutorial for building (it should work out of box, right?)
-3. ~~Find a way to properly package this app without using the stupid OneClick wizard~~ Need to switch to NET Core to do this. Use CefGlue maybe?
-4. Make an updater?
-5. Make an Icon, the default Atlas one makes me feel bad.
+3. Make an updater?
+4. Make an Icon, the default Atlas one makes me feel bad.
