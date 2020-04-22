@@ -98,7 +98,7 @@ namespace KtaneManualDownloader
             Instance = this;
             Window = uiWindow;
             new Settings();
-            new Scraper();
+            new RepoHandler();
 
             ModList = new ObservableCollection<KtaneMod>();
 
@@ -172,7 +172,7 @@ namespace KtaneManualDownloader
                 string steamID = new DirectoryInfo(dir).Name;
                 JObject modInfo = JObject.Parse(File.ReadAllText(dir + "/modInfo.json"));
 
-                var searchResults = Scraper.Instance.GetSearchResults(steamID);
+                var searchResults = RepoHandler.Instance.GetKtaneModulesBySteamID(steamID);
                 unsortedList.Add(new KtaneMod(modInfo["title"].ToString(), steamID, searchResults.ToArray()));
             }
 
@@ -232,13 +232,13 @@ namespace KtaneManualDownloader
                     moduleList.Add(module);
                     if (!Settings.Instance.ForceRedownload)
                     {
-                        if (File.Exists((Settings.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf")))
+                        if (File.Exists((Settings.Instance.ManualDownloadsFolder + module.FileName + ".pdf")))
                         {
                             continue;
                         }
                     }
-                    PdfDocument manual = Scraper.Instance.DownloadManual(module.ManualURL);
-                    manual.Save(Settings.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf");
+                    PdfDocument manual = RepoHandler.Instance.DownloadManual(module.ManualURL);
+                    manual.Save(Settings.Instance.ManualDownloadsFolder + module.FileName + ".pdf");
                 }
                 ModList[i].IsDownloaded = true;
                 SetProgressBar((int)((float)i / ModList.Count * 100));
@@ -344,7 +344,7 @@ namespace KtaneManualDownloader
             {
                 if (Settings.Instance.GroupByType)
                 {
-                    if (module.Type == Scraper.ModuleType.Regular)
+                    if (module.Type == RepoHandler.ModuleType.Regular)
                     {
                         if (!addedModuleSpacer)
                         {
@@ -363,7 +363,7 @@ namespace KtaneManualDownloader
                         }
                     }
 
-                    if (module.Type == Scraper.ModuleType.Needy)
+                    if (module.Type == RepoHandler.ModuleType.Needy)
                     {
                         if (!addedNeedySpacer)
                         {
