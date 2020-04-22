@@ -20,7 +20,7 @@ namespace KtaneManualDownloader
         #region Path Vars
 
         public string ResourcesPath = Path.GetFullPath("./Resources/");
-        public string VanillaDocsPath => Path.Combine(ResourcesPath, "VanillaDocuments");
+        public string VanillaDocsPath => Path.Combine(ResourcesPath, "VanillaDocuments/");
 
         public string CoverPath => VanillaDocsPath + "Cover.pdf";
 
