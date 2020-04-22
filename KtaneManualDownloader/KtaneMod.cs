@@ -1,19 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace KtaneManualDownloader
 {
     public class KtaneMod : INotifyPropertyChanged
     {
-
         public KtaneModule[] Modules;
         public string ModName { get; set; }
         public string SteamID { get; set; }
         private bool _selected;
+
         public bool IsSelected
         {
             get => _selected;
@@ -23,7 +18,9 @@ namespace KtaneManualDownloader
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsSelected)));
             }
         }
+
         private bool _enabled;
+
         public bool IsEnabled
         {
             get => _enabled;
@@ -33,10 +30,12 @@ namespace KtaneManualDownloader
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsEnabled)));
             }
         }
+
         private bool _downloaded;
+
         public bool IsDownloaded
         {
-            get 
+            get
             {
                 if (NoManual) return false;
                 return _downloaded;
@@ -47,6 +46,7 @@ namespace KtaneManualDownloader
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsDownloaded)));
             }
         }
+
         public bool NoManual
         {
             get

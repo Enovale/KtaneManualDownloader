@@ -1,19 +1,17 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
 using PdfSharp.Pdf;
 using System.IO;
 using PdfSharp.Pdf.IO;
 using System.Net;
-using System.Diagnostics;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Windows;
+using System.Text;
 
 namespace KtaneManualDownloader
 {
     public class RepoHandler
     {
-
         public static RepoHandler Instance;
 
         public enum ModuleType
@@ -35,13 +33,7 @@ namespace KtaneManualDownloader
 
         // Make this configurable
         public static string BaseRepoURL = "https://ktane.timwi.de/";
-        public static string RepoJsonUrl
-        {
-            get
-            {
-                return BaseRepoURL + "json/raw";
-            }
-        }
+        public static string RepoJsonUrl => BaseRepoURL + "json/raw";
 
         private List<KtaneModule> rawModuleList;
 
@@ -54,27 +46,33 @@ namespace KtaneManualDownloader
         public void GetRepoData()
         {
             string jsonString;
-            using (WebClient wc = new WebClient())
+            using (var wc = new WebClient())
             {
                 jsonString = wc.DownloadString(RepoJsonUrl);
             }
-            JObject rawJSON = JObject.Parse(jsonString);
-            JArray moduleArrayJSON = (JArray)rawJSON["KtaneModules"];
+
+            var rawJSON = JObject.Parse(jsonString);
+            var moduleArrayJSON = (JArray) rawJSON["KtaneModules"];
 
             rawModuleList = new List<KtaneModule>();
             foreach (JObject mod in moduleArrayJSON)
             {
+                var fileName = DecodeJsonString((string) (mod["FileName"] ?? mod["Name"]));
+                var manualName = "PDF/" +
+                                 Uri.EscapeUriString(fileName) +
+                                 ".pdf";
+
                 rawModuleList.Add(new KtaneModule(
-                    mod["Name"].ToString(),
-                    Uri.EscapeUriString(Path.Combine(BaseRepoURL, "PDF/" + (mod["FileName"] ?? mod["Name"]) + ".pdf")),
-                    mod["SteamID"].ToString(),
-                    "" + (mod["FileName"] ?? mod["Name"]),
-                    TypeStringToEnum(mod["Type"].ToString()),
-                    DiffStringToEnum("" + (mod["ExpertDifficulty"] ?? "Regular"))));
+                    DecodeJsonString((string) mod["Name"]),
+                    Path.Combine(BaseRepoURL, manualName),
+                    (string) mod["SteamID"],
+                    fileName,
+                    TypeStringToEnum((string) mod["Type"]),
+                    DiffStringToEnum((string) (mod["ExpertDifficulty"] ?? "Regular"))));
             }
         }
 
-        public List<KtaneModule> GetKtaneModulesBySteamID(string workshopID)
+        public List<KtaneModule> GetKtaneModulesBySteamId(string workshopID)
         {
             return rawModuleList.FindAll(module => module.SteamID == workshopID);
         }
@@ -88,23 +86,35 @@ namespace KtaneManualDownloader
         {
             PdfDocument inputDocument = null;
 
-            using (WebClient wc = new WebClient())
+            try
             {
-                using (MemoryStream stream = new MemoryStream(wc.DownloadData(url)))
+                using (var wc = new WebClient())
                 {
-                    inputDocument = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
-                    // Read the page count so PdfSharp doesn't think it's 0 /shrug
-                    int _ = inputDocument.PageCount;
+                    using (var stream = new MemoryStream(wc.DownloadData(url)))
+                    {
+                        inputDocument = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
+                        // Read the page count so PdfSharp doesn't think it's 0 /shrug
+                        var _ = inputDocument.PageCount;
+                    }
                 }
             }
+            catch (Exception e)
+            {
+                MessageBox.Show("Downloading this manual failed. We might crash now, oops.\n" + e.Message);
+            }
 
-            Debug.Assert(inputDocument != null);
             return inputDocument;
+        }
+
+        public string DecodeJsonString(string text)
+        {
+            var textBytes = Encoding.Default.GetBytes(text);
+            return Encoding.UTF8.GetString(textBytes);
         }
 
         public ModuleType TypeStringToEnum(string type)
         {
-            switch(type.ToLower().Trim())
+            switch (type.ToLower().Trim())
             {
                 case "regular":
                     return ModuleType.Regular;
@@ -119,7 +129,7 @@ namespace KtaneManualDownloader
 
         public ModuleDifficulty DiffStringToEnum(string difficulty)
         {
-            switch(difficulty.ToLower().Trim())
+            switch (difficulty.ToLower().Trim())
             {
                 case "very easy":
                     return ModuleDifficulty.VeryEasy;

@@ -1,25 +1,11 @@
 ﻿using Microsoft.Win32;
 using Microsoft.WindowsAPICodePack.Dialogs;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using PdfSharp.Pdf;
-using PdfSharp.Pdf.IO;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 
 namespace KtaneManualDownloader
 {
@@ -28,7 +14,6 @@ namespace KtaneManualDownloader
     /// </summary>
     public partial class MainWindow : Atlas.UI.Window
     {
-
         public MainWindow()
         {
             new KMD_Main(this);
@@ -59,18 +44,11 @@ namespace KtaneManualDownloader
         {
             KMD_Main.Instance.downloading = !state;
             if (state)
-            {
                 DownloadBtn.Content = "Download";
-            }
             else
-            {
                 DownloadBtn.Content = "Cancel";
-            }
 
-            foreach(KtaneMod mod in ModListPanel.Items)
-            {
-                mod.IsEnabled = state;
-            }
+            foreach (KtaneMod mod in ModListPanel.Items) mod.IsEnabled = state;
 
             DeselectBtn.IsEnabled = state;
             SelectBtn.IsEnabled = state;
@@ -134,71 +112,63 @@ namespace KtaneManualDownloader
             }
         }
 
-        private void MergeCheck_Checked(object sender, EventArgs e) => ToggleMergeControls(true);
-        private void MergeCheck_Unchecked(object sender, EventArgs e) => ToggleMergeControls(false);
+        private void MergeCheck_Checked(object sender, EventArgs e)
+        {
+            ToggleMergeControls(true);
+        }
+
+        private void MergeCheck_Unchecked(object sender, EventArgs e)
+        {
+            ToggleMergeControls(false);
+        }
 
         private void SelectModsDirBtn_Click(object sender, EventArgs e)
         {
-            if(!CommonOpenFileDialog.IsPlatformSupported)
-            {
+            if (!CommonFileDialog.IsPlatformSupported)
                 using (var fbd = new System.Windows.Forms.FolderBrowserDialog())
                 {
-                    System.Windows.Forms.DialogResult result = fbd.ShowDialog();
+                    var result = fbd.ShowDialog();
 
                     if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
-                    {
                         Settings.Instance.ModsFolderLocation = fbd.SelectedPath;
-                    }
                 }
-            }
             else
-            {
                 using (var fbd = new CommonOpenFileDialog())
                 {
                     fbd.IsFolderPicker = true;
 
-                    CommonFileDialogResult result = fbd.ShowDialog();
-                    if(result == CommonFileDialogResult.Ok && !string.IsNullOrWhiteSpace(fbd.FileName))
-                    {
+                    var result = fbd.ShowDialog();
+                    if (result == CommonFileDialogResult.Ok && !string.IsNullOrWhiteSpace(fbd.FileName))
                         Settings.Instance.ModsFolderLocation = fbd.FileName;
-                    }
                 }
-            }
+
             KMD_Main.Instance.LoadMods();
         }
 
         private void ManualDownloadsBtn_Click(object sender, EventArgs e)
         {
             if (!CommonFileDialog.IsPlatformSupported)
-            {
                 using (var fbd = new System.Windows.Forms.FolderBrowserDialog())
                 {
-                    System.Windows.Forms.DialogResult result = fbd.ShowDialog();
+                    var result = fbd.ShowDialog();
 
                     if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
-                    {
                         Settings.Instance.ManualDownloadsFolder = fbd.SelectedPath;
-                    }
                 }
-            }
             else
-            {
                 using (var fbd = new CommonOpenFileDialog())
                 {
                     fbd.IsFolderPicker = true;
 
-                    CommonFileDialogResult result = fbd.ShowDialog();
+                    var result = fbd.ShowDialog();
                     if (result == CommonFileDialogResult.Ok && !string.IsNullOrWhiteSpace(fbd.FileName))
-                    {
                         Settings.Instance.ManualDownloadsFolder = fbd.FileName;
-                    }
                 }
-            }
         }
 
         private void MergedPDFPathBtn_Click(object sender, EventArgs e)
         {
-            OpenFileDialog folderBrowser = new OpenFileDialog
+            var folderBrowser = new OpenFileDialog
             {
                 CheckFileExists = false,
                 CheckPathExists = true,
@@ -206,7 +176,7 @@ namespace KtaneManualDownloader
                 InitialDirectory = Path.GetDirectoryName(Application.ResourceAssembly.Location),
                 FileName = Path.GetFileName(Settings.Instance.MergedManualOutputPath),
                 Filter = "PDF files (*.pdf)|*.pdf|All files (*.*)|*.*"
-        };
+            };
             if (folderBrowser.ShowDialog() == true)
             {
                 Settings.Instance.MergedManualOutputPath = folderBrowser.FileName;
@@ -252,18 +222,12 @@ namespace KtaneManualDownloader
 
         private void DeselectBtn_Click(object sender, EventArgs e)
         {
-            foreach (KtaneMod mod in ModListPanel.Items)
-            {
-                mod.IsSelected = false;
-            }
+            foreach (KtaneMod mod in ModListPanel.Items) mod.IsSelected = false;
         }
 
         private void SelectBtn_Click(object sender, EventArgs e)
         {
-            foreach (KtaneMod mod in ModListPanel.Items)
-            {
-                mod.IsSelected = true;
-            }
+            foreach (KtaneMod mod in ModListPanel.Items) mod.IsSelected = true;
         }
 
         private void ResetSettingsBtn_Click(object sender, EventArgs e)

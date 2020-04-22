@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using System;
@@ -13,71 +12,33 @@ using System.Windows;
 
 namespace KtaneManualDownloader
 {
-   public class KMD_Main : INotifyPropertyChanged
+    public class KMD_Main : INotifyPropertyChanged
     {
-
         public static KMD_Main Instance;
         public static MainWindow Window;
 
         #region Path Vars
+
         public string ResourcesPath = Path.GetFullPath("./Resources/");
-        public string ManualJSONPath
-        {
-            get
-            {
-                return Path.Combine(ResourcesPath, "modules.json");
-            }
-        }
-        public string VanillaDocsPath
-        {
-            get
-            {
-                return Path.Combine(ResourcesPath, "VanillaDocuments");
-            }
-        }
-        public string CoverPath
-        {
-            get
-            {
-                return VanillaDocsPath + "Cover.pdf";
-            }
-        }
-        public string IntroPath
-        {
-            get
-            {
-                return VanillaDocsPath + "Intro.pdf";
-            }
-        }
-        public string ModuleSpacerPath
-        {
-            get
-            {
-                return VanillaDocsPath + "ModuleSpacer.pdf";
-            }
-        }
-        public string NeedySpacerPath
-        {
-            get
-            {
-                return VanillaDocsPath + "NeedySpacer.pdf";
-            }
-        }
-        public string AppendixPath
-        {
-            get
-            {
-                return VanillaDocsPath + "VanillaAppendix.pdf";
-            }
-        }
+        public string VanillaDocsPath => Path.Combine(ResourcesPath, "VanillaDocuments");
+
+        public string CoverPath => VanillaDocsPath + "Cover.pdf";
+
+        public string IntroPath => VanillaDocsPath + "Intro.pdf";
+        public string ModuleSpacerPath => VanillaDocsPath + "ModuleSpacer.pdf";
+        public string NeedySpacerPath => VanillaDocsPath + "NeedySpacer.pdf";
+
+        public string AppendixPath => VanillaDocsPath + "VanillaAppendix.pdf";
+
         #endregion
 
         public ObservableCollection<KtaneMod> ModList { get; set; }
 
         public int _progress;
-        public int DownloadProgress 
+
+        public int DownloadProgress
         {
-            get { return _progress; } 
+            get => _progress;
             set
             {
                 if (value != _progress)
@@ -111,32 +72,19 @@ namespace KtaneManualDownloader
 
         public void LoadSettings()
         {
-            if(Settings.Instance.ModsFolderLocation == null)
-            {
-                Settings.Instance.ModsFolderLocation = "";
-            }
+            if (Settings.Instance.ModsFolderLocation == null) Settings.Instance.ModsFolderLocation = "";
             if (!string.IsNullOrEmpty(Properties.Settings.Default.ModFolderPath))
-            {
                 Settings.Instance.ModsFolderLocation = Properties.Settings.Default.ModFolderPath;
-            }
 
             if (string.IsNullOrEmpty(Properties.Settings.Default.ManualFolderPath))
-            {
                 ResetSettings();
-            }
             else
-            {
                 Settings.Instance.ManualDownloadsFolder = Properties.Settings.Default.ManualFolderPath;
-            }
 
             if (string.IsNullOrEmpty(Properties.Settings.Default.MergedPDFPath))
-            {
                 ResetSettings();
-            }
             else
-            {
                 Settings.Instance.MergedManualOutputPath = Properties.Settings.Default.MergedPDFPath;
-            }
 
             Properties.Settings.Default.Save();
         }
@@ -157,30 +105,28 @@ namespace KtaneManualDownloader
 
         public void LoadMods()
         {
-            if ((Settings.Instance.ModsFolderLocation).Trim() == "") return;
+            if (Settings.Instance.ModsFolderLocation.Trim() == "") return;
             if (!PathChecks.IsFolderKtane(Settings.Instance.ModsFolderLocation)) return;
             if (!Directory.Exists(Settings.Instance.ModsFolderLocation)) return;
 
             Properties.Settings.Default.ModFolderPath = Settings.Instance.ModsFolderLocation;
             Properties.Settings.Default.Save();
 
-            string[] dirs = Directory.GetDirectories(Settings.Instance.ModsFolderLocation, "*", SearchOption.TopDirectoryOnly);
+            var dirs = Directory.GetDirectories(Settings.Instance.ModsFolderLocation, "*",
+                SearchOption.TopDirectoryOnly);
             ModList.Clear();
             var unsortedList = new List<KtaneMod>();
-            foreach (string dir in dirs)
+            foreach (var dir in dirs)
             {
-                string steamID = new DirectoryInfo(dir).Name;
-                JObject modInfo = JObject.Parse(File.ReadAllText(dir + "/modInfo.json"));
+                var steamID = new DirectoryInfo(dir).Name;
+                var modInfo = JObject.Parse(File.ReadAllText(dir + "/modInfo.json"));
 
-                var searchResults = RepoHandler.Instance.GetKtaneModulesBySteamID(steamID);
+                var searchResults = RepoHandler.Instance.GetKtaneModulesBySteamId(steamID);
                 unsortedList.Add(new KtaneMod(modInfo["title"].ToString(), steamID, searchResults.ToArray()));
             }
 
             var sortedList = unsortedList.OrderBy(mod => mod.ModName);
-            foreach(KtaneMod mod in sortedList)
-            {
-                ModList.Add(mod);
-            }
+            foreach (var mod in sortedList) ModList.Add(mod);
 
             UpdateDownloadStatus();
         }
@@ -188,12 +134,13 @@ namespace KtaneManualDownloader
         public void UpdateDownloadStatus()
         {
             if (!Directory.Exists(Settings.Instance.ManualDownloadsFolder)) return;
-            DirectoryInfo manualDir = new DirectoryInfo(Settings.Instance.ManualDownloadsFolder);
-            foreach(KtaneMod mod in ModList)
+            var manualDir = new DirectoryInfo(Settings.Instance.ManualDownloadsFolder);
+            foreach (var mod in ModList)
             {
-                bool allDownloaded = mod.Modules.ToList().FindAll(module =>
+                var allDownloaded = mod.Modules.ToList().FindAll(module =>
                 {
-                    return File.Exists(Settings.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf");
+                    return File.Exists(
+                        Settings.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf");
                 }).Count == mod.Modules.Length;
 
                 if (allDownloaded) mod.IsDownloaded = true;
@@ -213,9 +160,10 @@ namespace KtaneManualDownloader
                 Window.Dispatcher.Invoke(() => Window.ToggleControlsDuringDownload(true));
                 return;
             }
+
             Directory.CreateDirectory(Settings.Instance.ManualDownloadsFolder);
-            List<KtaneModule> moduleList = new List<KtaneModule>();
-            for (int i = 0; i < ModList.Count; i++)
+            var moduleList = new List<KtaneModule>();
+            for (var i = 0; i < ModList.Count; i++)
             {
                 if (cancelWork)
                 {
@@ -224,27 +172,24 @@ namespace KtaneManualDownloader
                     cancelWork = false;
                     return;
                 }
+
                 if (!ModList[i].IsSelected) continue;
                 var modModules = ModList[i].Modules;
-                foreach (KtaneModule module in modModules)
+                foreach (var module in modModules)
                 {
                     module.ModName = ModList[i].ModName;
                     moduleList.Add(module);
                     if (!Settings.Instance.ForceRedownload)
-                    {
-                        if (File.Exists((Settings.Instance.ManualDownloadsFolder + module.FileName + ".pdf")))
-                        {
+                        if (File.Exists(Settings.Instance.ManualDownloadsFolder + module.FileName + ".pdf"))
                             continue;
-                        }
-                    }
-                    PdfDocument manual = RepoHandler.Instance.DownloadManual(module.ManualURL);
+                    var manual = RepoHandler.Instance.DownloadManual(module.ManualURL);
                     manual.Save(Settings.Instance.ManualDownloadsFolder + module.FileName + ".pdf");
                 }
+
                 ModList[i].IsDownloaded = true;
-                SetProgressBar((int)((float)i / ModList.Count * 100));
+                SetProgressBar((int) ((float) i / ModList.Count * 100));
             }
-            File.WriteAllText(ManualJSONPath,
-                JsonConvert.SerializeObject(moduleList));
+
             Window.Dispatcher.Invoke(() => Window.ToggleControlsDuringDownload(true));
             SetProgressBar(0);
 
@@ -253,7 +198,7 @@ namespace KtaneManualDownloader
 
         public void MergeManuals()
         {
-            Settings.SortMode sortMode = Settings.Instance.SortingChoice;
+            var sortMode = Settings.Instance.SortingChoice;
 
             if (ModList.Count <= 0 || !AreNoModsSelected())
             {
@@ -262,131 +207,109 @@ namespace KtaneManualDownloader
                 return;
             }
 
-            DirectoryInfo manualDir = new DirectoryInfo(Settings.Instance.ManualDownloadsFolder);
+            var manualDir = new DirectoryInfo(Settings.Instance.ManualDownloadsFolder);
             // If dir is empty or just modules.json
             if (manualDir.GetFiles().Length <= 1)
             {
                 MessageBox.Show("No manuals have been downloaded, " +
-                    "please redownload them or report this to the developer");
-                Window.Dispatcher.Invoke(() => Window.ToggleControlsDuringDownload(true));
-                return;
-            }
-            if (!File.Exists(ManualJSONPath))
-            {
-                MessageBox.Show("You cannot merge manuals because you have not completed a download" +
-                    "of the manuals yet. Starting it and cancelling it isn't enough");
+                                "please redownload them or report this to the developer");
                 Window.Dispatcher.Invoke(() => Window.ToggleControlsDuringDownload(true));
                 return;
             }
 
             Window.Dispatcher.Invoke(() => Window.ToggleControlsDuringDownload(false));
 
-            string unformattedJSON = File.ReadAllText(KMD_Main.Instance.ManualJSONPath);
-            JArray modulesJSON = JArray.Parse(unformattedJSON);
-            List<KtaneModule> modules = modulesJSON.ToObject<List<KtaneModule>>();
+            var selectedMods = ModList.ToList().FindAll(mod => mod.IsSelected);
+            var modules = new List<KtaneModule>();
+            selectedMods.ForEach(mod => modules.AddRange(mod.Modules));
             modules = SortModuleList(sortMode, modules);
             if (Settings.Instance.GroupByType)
             {
-                List<List<KtaneModule>> groupedList = modules.GroupBy(mod => mod.Type)
+                var groupedList = modules.GroupBy(mod => mod.Type)
                     .Select(grp => grp.ToList())
                     .ToList();
-                List<KtaneModule> sortedList = new List<KtaneModule>();
-                foreach (List<KtaneModule> list in groupedList)
+                var sortedList = new List<KtaneModule>();
+                foreach (var list in groupedList)
                 {
                     var sortedGroup = SortModuleList(sortMode, list);
                     sortedList.AddRange(sortedGroup);
                 }
+
                 modules = sortedList;
             }
+
             if (Settings.Instance.ReverseOrder) modules.Reverse();
 
             // Remove unchecked mods
-            foreach (KtaneMod listedMod in ModList)
-            {
+            foreach (var listedMod in ModList)
                 if (!listedMod.IsSelected)
-                {
                     modules.RemoveAll(mod => mod.ModName == listedMod.ModName);
-                }
-            }
 
-            PdfDocument mergedDocument = new PdfDocument();
+            var mergedDocument = new PdfDocument();
 
             if (Settings.Instance.VanillaMerge)
             {
-                if (File.Exists(KMD_Main.Instance.CoverPath))
+                if (File.Exists(Instance.CoverPath))
                 {
-                    PdfDocument coverPage = PdfReader.Open(
-                        KMD_Main.Instance.CoverPath,
+                    var coverPage = PdfReader.Open(
+                        Instance.CoverPath,
                         PdfDocumentOpenMode.Import);
-                    foreach (PdfPage page in coverPage.Pages)
-                    {
-                        mergedDocument.AddPage(page);
-                    }
+                    foreach (var page in coverPage.Pages) mergedDocument.AddPage(page);
                     coverPage.Dispose();
                 }
-                if (File.Exists(KMD_Main.Instance.IntroPath))
+
+                if (File.Exists(Instance.IntroPath))
                 {
-                    PdfDocument introPage = PdfReader.Open(
-                        KMD_Main.Instance.IntroPath,
+                    var introPage = PdfReader.Open(
+                        Instance.IntroPath,
                         PdfDocumentOpenMode.Import);
-                    foreach (PdfPage page in introPage.Pages)
-                    {
-                        mergedDocument.AddPage(page);
-                    }
+                    foreach (var page in introPage.Pages) mergedDocument.AddPage(page);
                     introPage.Dispose();
                 }
             }
 
 
-            bool addedModuleSpacer = false;
-            bool addedNeedySpacer = false;
-            foreach (KtaneModule module in modules)
+            var addedModuleSpacer = false;
+            var addedNeedySpacer = false;
+            foreach (var module in modules)
             {
                 if (Settings.Instance.GroupByType)
                 {
                     if (module.Type == RepoHandler.ModuleType.Regular)
-                    {
                         if (!addedModuleSpacer)
                         {
-                            if (File.Exists(KMD_Main.Instance.ModuleSpacerPath))
+                            if (File.Exists(Instance.ModuleSpacerPath))
                             {
-                                PdfDocument moduleSpacerPage = PdfReader.Open(
-                                    KMD_Main.Instance.ModuleSpacerPath,
+                                var moduleSpacerPage = PdfReader.Open(
+                                    Instance.ModuleSpacerPath,
                                     PdfDocumentOpenMode.Import);
-                                foreach (PdfPage page in moduleSpacerPage.Pages)
-                                {
-                                    mergedDocument.AddPage(page);
-                                }
+                                foreach (var page in moduleSpacerPage.Pages) mergedDocument.AddPage(page);
                                 moduleSpacerPage.Dispose();
                             }
+
                             addedModuleSpacer = true;
                         }
-                    }
 
                     if (module.Type == RepoHandler.ModuleType.Needy)
-                    {
                         if (!addedNeedySpacer)
                         {
-                            if (File.Exists(KMD_Main.Instance.NeedySpacerPath))
+                            if (File.Exists(Instance.NeedySpacerPath))
                             {
-                                PdfDocument needySpacerPage = PdfReader.Open(
+                                var needySpacerPage = PdfReader.Open(
                                     NeedySpacerPath,
                                     PdfDocumentOpenMode.Import);
-                                foreach (PdfPage page in needySpacerPage.Pages)
-                                {
-                                    mergedDocument.AddPage(page);
-                                }
+                                foreach (var page in needySpacerPage.Pages) mergedDocument.AddPage(page);
                                 needySpacerPage.Dispose();
                             }
+
                             addedNeedySpacer = true;
                         }
-                    }
                 }
 
-                PdfDocument moduleManual = PdfReader.Open(
+                var moduleManual = PdfReader.Open(
                     Settings.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf",
                     PdfDocumentOpenMode.Import);
-                foreach (PdfPage page in moduleManual.Pages)
+                foreach (var page in moduleManual.Pages)
                 {
                     //string pageContent = page.Contents.Elements.GetDictionary(0).Stream.ToString();
                     //bool appendix = pageContent.FirstOrDefault(s => s.ToLower().Contains("appendix")) != null;
@@ -397,29 +320,26 @@ namespace KtaneManualDownloader
                         cancelWork = false;
                         return;
                     }
+
                     mergedDocument.AddPage(page);
                 }
+
                 moduleManual.Dispose();
-                int i = modules.IndexOf(module);
-                SetProgressBar((int)((float)i / modules.Count * 100));
+                var i = modules.IndexOf(module);
+                SetProgressBar((int) ((float) i / modules.Count * 100));
             }
 
             if (Settings.Instance.VanillaMerge)
-            {
                 if (File.Exists(AppendixPath))
                 {
-                    PdfDocument appendixPages = PdfReader.Open(
+                    var appendixPages = PdfReader.Open(
                         AppendixPath,
                         PdfDocumentOpenMode.Import);
-                    foreach (PdfPage page in appendixPages.Pages)
-                    {
-                        mergedDocument.AddPage(page);
-                    }
+                    foreach (var page in appendixPages.Pages) mergedDocument.AddPage(page);
                     appendixPages.Dispose();
                 }
-            }
 
-            string errorMessage = "";
+            var errorMessage = "";
             if (mergedDocument.CanSave(ref errorMessage))
             {
                 SetProgressBar(100);
@@ -449,16 +369,17 @@ namespace KtaneManualDownloader
                     modules.Sort((x, y) => SmartCompare(x.ModuleName, y.ModuleName));
                     break;
                 case Settings.SortMode.Difficulty:
-                    List<List<KtaneModule>> groupedList = modules.GroupBy(mod => mod.Difficulty)
+                    var groupedList = modules.GroupBy(mod => mod.Difficulty)
                         .Select(grp => grp.ToList())
                         .OrderBy(list => list.First().Difficulty)
                         .ToList();
-                    List<KtaneModule> sortedList = new List<KtaneModule>();
-                    foreach (List<KtaneModule> list in groupedList)
+                    var sortedList = new List<KtaneModule>();
+                    foreach (var list in groupedList)
                     {
                         list.Sort((x, y) => SmartCompare(x.ModuleName, y.ModuleName));
                         sortedList.AddRange(list);
                     }
+
                     modules = sortedList;
                     break;
             }
@@ -468,25 +389,24 @@ namespace KtaneManualDownloader
 
         private bool AreNoModsSelected()
         {
-            bool isOneChecked = false;
-            foreach (KtaneMod mod in ModList)
-            {
+            var isOneChecked = false;
+            foreach (var mod in ModList)
                 if (mod.IsSelected)
                 {
                     isOneChecked = true;
                     break;
                 }
-            }
+
             return isOneChecked;
         }
 
         private static Regex smartCompareExpression
-        = new Regex(@"^(?:A |The )\s*",
-            RegexOptions.Compiled |
-            RegexOptions.CultureInvariant |
-            RegexOptions.IgnoreCase);
+            = new Regex(@"^(?:A |The )\s*",
+                RegexOptions.Compiled |
+                RegexOptions.CultureInvariant |
+                RegexOptions.IgnoreCase);
 
-        public static Int32 SmartCompare(String x, String y)
+        public static int SmartCompare(string x, string y)
         {
             x = smartCompareExpression.Replace(x, "");
             y = smartCompareExpression.Replace(y, "");
