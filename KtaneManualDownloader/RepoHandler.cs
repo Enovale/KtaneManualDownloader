@@ -14,10 +14,12 @@ namespace KtaneManualDownloader
     public class RepoHandler
     {
         public static RepoHandler Instance;
-        
+
         // Make this configurable
         public static string BaseRepoURL = "https://ktane.timwi.de/";
-        public static string RepoJsonUrl => BaseRepoURL + "json";
+        public static string RepoJsonUrl => BaseRepoURL + "json/raw";
+
+        private static WebClient _wc = new WebClient();
 
         private List<KtaneModule> _rawModuleList;
 
@@ -56,10 +58,8 @@ namespace KtaneManualDownloader
             }
         }
 
-        public List<KtaneModule> GetKtaneModulesBySteamId(string workshopID)
-        {
-            return _rawModuleList.FindAll(module => module.SteamID == workshopID);
-        }
+        public List<KtaneModule> GetKtaneModulesBySteamId(string workshopID) 
+            => _rawModuleList.FindAll(module => module.SteamID == workshopID);
 
         /// <summary>
         /// Download the PDF at the URL into memory and open it as a PdfDocument.
@@ -72,15 +72,17 @@ namespace KtaneManualDownloader
 
             try
             {
-                using (var wc = new WebClient())
+                using (var stream = new MemoryStream(_wc.DownloadData(url)))
                 {
-                    using (var stream = new MemoryStream(wc.DownloadData(url)))
-                    {
-                        inputDocument = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
-                        // Read the page count so PdfSharp doesn't think it's 0 /shrug
-                        var _ = inputDocument.PageCount;
-                    }
+                    inputDocument = PdfReader.Open(stream, PdfDocumentOpenMode.Import);
+                    // Read the page count so PdfSharp doesn't think it's 0 /shrug
+                    var _ = inputDocument.PageCount;
                 }
+            }
+            catch (WebException e)
+            {
+                if (((HttpWebResponse) e.Response).StatusCode == HttpStatusCode.NotFound)
+                    Console.WriteLine("Not found: " + url);
             }
             catch (Exception e)
             {

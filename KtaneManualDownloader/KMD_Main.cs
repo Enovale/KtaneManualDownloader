@@ -183,7 +183,8 @@ namespace KtaneManualDownloader
                         if (File.Exists(Settings.Instance.ManualDownloadsFolder + module.FileName + ".pdf"))
                             continue;
                     var manual = RepoHandler.Instance.DownloadManual(module.ManualURL);
-                    manual.Save(Settings.Instance.ManualDownloadsFolder + module.FileName + ".pdf");
+                    if(manual != null)
+                        manual.Save(Settings.Instance.ManualDownloadsFolder + module.FileName + ".pdf");
                 }
 
                 ModList[i].IsDownloaded = true;
