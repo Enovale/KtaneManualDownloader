@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net472</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <PublishTrimmed>true</PublishTrimmed>
@@ -10,7 +10,7 @@
     <AssemblyTitle>KtaneManualDownloader</AssemblyTitle>
     <Product>KtaneManualDownloader</Product>
     <Copyright>Copyright ©  2020</Copyright>
-    <LangVersion>7.3</LangVersion>
+    <LangVersion>8</LangVersion>
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <Prefer32Bit>true</Prefer32Bit>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
@@ -58,6 +58,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="PDFsharp" Version="1.51.5185-beta" />
     <PackageReference Include="WindowsAPICodePack-Shell" Version="1.1.1" />
   </ItemGroup>
   <ItemGroup>
