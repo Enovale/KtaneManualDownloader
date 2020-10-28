@@ -7,35 +7,19 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Windows;
 using System.Text;
+using KtaneManualDownloader.Enums;
 
 namespace KtaneManualDownloader
 {
     public class RepoHandler
     {
         public static RepoHandler Instance;
-
-        public enum ModuleType
-        {
-            Regular = 0,
-            Needy = 1,
-            Boss = 2,
-            Uncategorized = 3
-        }
-
-        public enum ModuleDifficulty
-        {
-            VeryEasy = 0,
-            Easy = 1,
-            Medium = 2,
-            Hard = 3,
-            VeryHard = 4
-        }
-
+        
         // Make this configurable
         public static string BaseRepoURL = "https://ktane.timwi.de/";
-        public static string RepoJsonUrl => BaseRepoURL + "json/raw";
+        public static string RepoJsonUrl => BaseRepoURL + "json";
 
-        private List<KtaneModule> rawModuleList;
+        private List<KtaneModule> _rawModuleList;
 
         public RepoHandler()
         {
@@ -54,7 +38,7 @@ namespace KtaneManualDownloader
             var rawJSON = JObject.Parse(jsonString);
             var moduleArrayJSON = (JArray) rawJSON["KtaneModules"];
 
-            rawModuleList = new List<KtaneModule>();
+            _rawModuleList = new List<KtaneModule>();
             foreach (JObject mod in moduleArrayJSON)
             {
                 var fileName = DecodeJsonString((string) (mod["FileName"] ?? mod["Name"]));
@@ -62,7 +46,7 @@ namespace KtaneManualDownloader
                                  Uri.EscapeUriString(fileName) +
                                  ".pdf";
 
-                rawModuleList.Add(new KtaneModule(
+                _rawModuleList.Add(new KtaneModule(
                     DecodeJsonString((string) mod["Name"]),
                     Path.Combine(BaseRepoURL, manualName),
                     (string) mod["SteamID"],
@@ -74,7 +58,7 @@ namespace KtaneManualDownloader
 
         public List<KtaneModule> GetKtaneModulesBySteamId(string workshopID)
         {
-            return rawModuleList.FindAll(module => module.SteamID == workshopID);
+            return _rawModuleList.FindAll(module => module.SteamID == workshopID);
         }
 
         /// <summary>

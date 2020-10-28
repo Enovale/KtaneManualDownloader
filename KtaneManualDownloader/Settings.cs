@@ -1,16 +1,10 @@
 ﻿using System.ComponentModel;
+using KtaneManualDownloader.Enums;
 
 namespace KtaneManualDownloader
 {
     public class Settings : INotifyPropertyChanged
     {
-        public enum SortMode
-        {
-            Mod = 0,
-            Module = 1,
-            Difficulty = 2
-        }
-
         public static Settings Instance;
 
         #region CheckBoxes

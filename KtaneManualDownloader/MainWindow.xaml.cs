@@ -42,7 +42,7 @@ namespace KtaneManualDownloader
 
         public void ToggleControlsDuringDownload(bool state)
         {
-            KMD_Main.Instance.downloading = !state;
+            KMD_Main.Instance.Downloading = !state;
             if (state)
                 DownloadBtn.Content = "Download";
             else
@@ -88,9 +88,9 @@ namespace KtaneManualDownloader
 
         private void DownloadBtn_Click(object sender, EventArgs e)
         {
-            if (KMD_Main.Instance.downloading)
+            if (KMD_Main.Instance.Downloading)
             {
-                KMD_Main.Instance.cancelWork = true;
+                KMD_Main.Instance.CancelWork = true;
             }
             else
             {
@@ -101,9 +101,9 @@ namespace KtaneManualDownloader
 
         private void MergeBtn_Click(object sender, EventArgs e)
         {
-            if (KMD_Main.Instance.downloading)
+            if (KMD_Main.Instance.Downloading)
             {
-                KMD_Main.Instance.cancelWork = true;
+                KMD_Main.Instance.CancelWork = true;
             }
             else
             {

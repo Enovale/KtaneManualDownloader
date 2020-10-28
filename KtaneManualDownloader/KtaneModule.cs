@@ -1,4 +1,5 @@
-﻿using static KtaneManualDownloader.RepoHandler;
+﻿using KtaneManualDownloader.Enums;
+using static KtaneManualDownloader.RepoHandler;
 
 namespace KtaneManualDownloader
 {

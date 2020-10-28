@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
+using KtaneManualDownloader.Enums;
 
 namespace KtaneManualDownloader
 {
@@ -34,8 +35,7 @@ namespace KtaneManualDownloader
 
         public ObservableCollection<KtaneMod> ModList { get; set; }
 
-        public int _progress;
-
+        private int _progress;
         public int DownloadProgress
         {
             get => _progress;
@@ -49,8 +49,8 @@ namespace KtaneManualDownloader
             }
         }
 
-        public bool downloading = false;
-        public bool cancelWork = false;
+        public bool Downloading = false;
+        public bool CancelWork = false;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -165,11 +165,11 @@ namespace KtaneManualDownloader
             var moduleList = new List<KtaneModule>();
             for (var i = 0; i < ModList.Count; i++)
             {
-                if (cancelWork)
+                if (CancelWork)
                 {
                     Window.Dispatcher.Invoke(() => Window.ToggleControlsDuringDownload(true));
                     Window.Dispatcher.Invoke(() => SetProgressBar(0));
-                    cancelWork = false;
+                    CancelWork = false;
                     return;
                 }
 
@@ -225,7 +225,7 @@ namespace KtaneManualDownloader
             modules = SortModuleList(sortMode, modules);
             if (Settings.Instance.GroupByType)
             {
-                var groupedList = modules.GroupBy(mod => mod.Type)
+                var groupedList = modules.GroupBy(mod => (int)mod.Type)
                     .Select(grp => grp.ToList())
                     .ToList();
                 var sortedList = new List<KtaneModule>();
@@ -275,7 +275,7 @@ namespace KtaneManualDownloader
             {
                 if (Settings.Instance.GroupByType)
                 {
-                    if (module.Type == RepoHandler.ModuleType.Regular)
+                    if (module.Type == ModuleType.Regular)
                         if (!addedModuleSpacer)
                         {
                             if (File.Exists(Instance.ModuleSpacerPath))
@@ -290,7 +290,7 @@ namespace KtaneManualDownloader
                             addedModuleSpacer = true;
                         }
 
-                    if (module.Type == RepoHandler.ModuleType.Needy)
+                    if (module.Type == ModuleType.Needy)
                         if (!addedNeedySpacer)
                         {
                             if (File.Exists(Instance.NeedySpacerPath))
@@ -313,11 +313,11 @@ namespace KtaneManualDownloader
                 {
                     //string pageContent = page.Contents.Elements.GetDictionary(0).Stream.ToString();
                     //bool appendix = pageContent.FirstOrDefault(s => s.ToLower().Contains("appendix")) != null;
-                    if (cancelWork)
+                    if (CancelWork)
                     {
                         Window.Dispatcher.Invoke(() => Window.ToggleControlsDuringDownload(true));
                         SetProgressBar(0);
-                        cancelWork = false;
+                        CancelWork = false;
                         return;
                     }
 
@@ -355,23 +355,23 @@ namespace KtaneManualDownloader
 
             Window.Dispatcher.Invoke(() => Window.ToggleControlsDuringDownload(true));
             SetProgressBar(0);
-            cancelWork = false;
+            CancelWork = false;
         }
 
-        private static List<KtaneModule> SortModuleList(Settings.SortMode sortMode, List<KtaneModule> modules)
+        private static List<KtaneModule> SortModuleList(SortMode sortMode, List<KtaneModule> modules)
         {
             switch (sortMode)
             {
-                case Settings.SortMode.Mod:
+                case SortMode.Mod:
                     modules.Sort((x, y) => SmartCompare(x.ModName, y.ModName));
                     break;
-                case Settings.SortMode.Module:
+                case SortMode.Module:
                     modules.Sort((x, y) => SmartCompare(x.ModuleName, y.ModuleName));
                     break;
-                case Settings.SortMode.Difficulty:
-                    var groupedList = modules.GroupBy(mod => mod.Difficulty)
+                case SortMode.Difficulty:
+                    var groupedList = modules.GroupBy(mod => (int)mod.Difficulty)
                         .Select(grp => grp.ToList())
-                        .OrderBy(list => list.First().Difficulty)
+                        .OrderBy(list => (int)list.First().Difficulty)
                         .ToList();
                     var sortedList = new List<KtaneModule>();
                     foreach (var list in groupedList)
