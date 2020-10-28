@@ -239,12 +239,8 @@ namespace KtaneManualDownloader
                 modules = sortedList;
             }
 
-            if (Settings.Instance.ReverseOrder) modules.Reverse();
-
-            // Remove unchecked mods
-            foreach (var listedMod in ModList)
-                if (!listedMod.IsSelected)
-                    modules.RemoveAll(mod => mod.ModName == listedMod.ModName);
+            if (Settings.Instance.ReverseOrder)
+                modules.Reverse();
 
             var mergedDocument = new PdfDocument();
 
@@ -307,8 +303,11 @@ namespace KtaneManualDownloader
                         }
                 }
 
+                var pdfPath = Settings.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf";
+                if (!File.Exists(pdfPath))
+                    continue;
                 var moduleManual = PdfReader.Open(
-                    Settings.Instance.ManualDownloadsFolder + module.ModuleName + ".pdf",
+                    pdfPath,
                     PdfDocumentOpenMode.Import);
                 foreach (var page in moduleManual.Pages)
                 {
